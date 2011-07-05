@@ -1,0 +1,11 @@
+pygtail (0.2) lucid; urgency=low
+
+  * Add setup.py and debianize.
+
+ -- Brad Greenlee <brad@footle.org>  Wed, 05 Jul 2011 15:04:42 -0700
+
+pygtail (0.1) lucid; urgency=low
+
+  * Initial release.
+
+ -- Brad Greenlee <brad@footle.org>  Wed, 29 Jun 2011 22:33:12 -0700

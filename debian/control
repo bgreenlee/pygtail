@@ -1,0 +1,13 @@
+Source: pygtail
+Section: python
+Priority: optional
+Maintainer: Brad Greenlee <brad@footle.org>
+Build-Depends: debhelper (>= 7)
+Build-Depends-Indep: python-support, python-setuptools
+Standards-Version: 3.8.3
+Homepage: http://github.com/bgreenlee/pygtail
+
+Package: pygtail
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Reads log file lines that have not been read.

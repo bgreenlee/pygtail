@@ -29,6 +29,8 @@ import glob
 import string
 from optparse import OptionParser
 
+__version__ = '0.2'
+
 class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
