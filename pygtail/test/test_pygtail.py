@@ -3,6 +3,7 @@ import unittest
 import tempfile
 from pygtail import Pygtail
 
+
 class PygtailTest(unittest.TestCase):
     # TODO:
     # - test for non-default offset file
@@ -58,6 +59,7 @@ class PygtailTest(unittest.TestCase):
         self.append(new_lines[1])
         pygtail = Pygtail(self.logfile.name)
         self.assertEquals(pygtail.read(), ''.join(new_lines))
+
 
 def main():
     unittest.main()

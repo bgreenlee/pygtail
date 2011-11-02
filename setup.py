@@ -3,6 +3,7 @@ from setuptools import setup
 
 from pygtail import __version__
 
+
 def main():
     cwd = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(cwd, 'README.txt')
