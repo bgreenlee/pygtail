@@ -23,7 +23,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from os import stat
-from os.path import exists
+from os.path import exists, getsize
 import sys
 import glob
 import string
@@ -45,8 +45,8 @@ class Pygtail(object):
         self._fh = None
         self._rotated_logfile = None
 
-        # if offset file exists, open and parse it
-        if exists(self._offset_file):
+        # if offset file exists and non-empty, open and parse it
+        if exists(self._offset_file) and getsize(self._offset_file):
             offset_fh = open(self._offset_file, "r")
             (self._offset_file_inode, self._offset) = \
                 [string.atoi(line.strip()) for line in offset_fh]
