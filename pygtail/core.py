@@ -56,6 +56,10 @@ class Pygtail(object):
                 # Look for the rotated file and process that if we find it.
                 self._rotated_logfile = self._determine_rotated_logfile()
 
+    def __del__(self):
+        if self._filehandle():
+            self._filehandle().close()
+
     def __iter__(self):
         return self
 
