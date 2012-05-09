@@ -26,11 +26,13 @@ From the command line:
 
 In your code:
 
-    from pygtail import Pygtail
+```python
+from pygtail import Pygtail
 
-    for line in Pygtail("some.log"):
-        sys.stdout.write(line)
-    
+for line in Pygtail("some.log"):
+    sys.stdout.write(line)
+```
+
 Notes
 -----
 
