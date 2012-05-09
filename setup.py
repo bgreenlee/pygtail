@@ -7,11 +7,12 @@ from pygtail import __version__
 def main():
     cwd = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(cwd, 'README.txt')
-    readme = open(path, 'rb').read()
+    readme = open(path, 'r').read()
 
     setup(
         name = 'pygtail',
         version = __version__,
+        use_2to3=True,
         description = 'Reads log file lines that have not been read.',
         license = 'GPL v2',
         author = 'Brad Greenlee',
@@ -22,8 +23,7 @@ def main():
         entry_points = {
             'console_scripts': ['pygtail=pygtail.core:main']
             },
-        tests_require=['unittest2'],
-        test_suite='unittest2.collector',
+        test_suite='pygtail.test',
         classifiers = [
             "Development Status :: 4 - Beta",
             "Intended Audience :: Developers",

@@ -14,7 +14,7 @@ class PygtailTest(unittest.TestCase):
         self.test_lines = ["1\n", "2\n", "3\n"]
         self.test_str = ''.join(self.test_lines)
         self.logfile = tempfile.NamedTemporaryFile(delete=False)
-        self.logfile.write(self.test_str)
+        self.logfile.write(self.test_str.encode('utf-8'))
         self.logfile.close()
 
     def append(self, str):
