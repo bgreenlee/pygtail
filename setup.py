@@ -22,6 +22,8 @@ def main():
         entry_points = {
             'console_scripts': ['pygtail=pygtail.core:main']
             },
+        tests_require=['unittest2'],
+        test_suite='unittest2.collector',
         classifiers = [
             "Development Status :: 4 - Beta",
             "Intended Audience :: Developers",
