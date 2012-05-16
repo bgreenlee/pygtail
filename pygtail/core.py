@@ -49,7 +49,7 @@ class Pygtail(object):
         if exists(self._offset_file) and getsize(self._offset_file):
             offset_fh = open(self._offset_file, "r")
             (self._offset_file_inode, self._offset) = \
-                [string.atoi(line.strip()) for line in offset_fh]
+                [int(line.strip()) for line in offset_fh]
             offset_fh.close()
             if self._offset_file_inode != stat(self.filename).st_ino:
                 # The inode has changed, so the file might have been rotated.
@@ -68,7 +68,7 @@ class Pygtail(object):
         Return the next line in the file, updating the offset.
         """
         try:
-            line = self._filehandle().next()
+            line = next(self._filehandle())
         except StopIteration:
             # we've reached the end of the file; if we're processing the
             # rotated log file, we can continue with the actual file; otherwise
@@ -79,7 +79,7 @@ class Pygtail(object):
                 self._offset = 0
                 # open up current logfile and continue
                 try:
-                    line = self._filehandle().next()
+                    line = next(self._filehandle())
                 except StopIteration:  # oops, empty file
                     self._update_offset_file()
                     raise
@@ -91,6 +91,10 @@ class Pygtail(object):
             self._update_offset_file()
 
         return line
+
+    def __next__(self):
+        """`__next__` is the Python 3 version of `next`"""
+        return self.next()
 
     def readlines(self):
         """

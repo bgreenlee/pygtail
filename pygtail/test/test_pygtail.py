@@ -14,7 +14,7 @@ class PygtailTest(unittest.TestCase):
         self.test_lines = ["1\n", "2\n", "3\n"]
         self.test_str = ''.join(self.test_lines)
         self.logfile = tempfile.NamedTemporaryFile(delete=False)
-        self.logfile.write(self.test_str)
+        self.logfile.write(self.test_str.encode('utf-8'))
         self.logfile.close()
 
     def append(self, str):
@@ -31,24 +31,24 @@ class PygtailTest(unittest.TestCase):
 
     def test_read(self):
         pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(pygtail.read(), self.test_str)
+        self.assertEqual(pygtail.read(), self.test_str)
 
     def test_readlines(self):
         pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(pygtail.readlines(), self.test_lines)
+        self.assertEqual(pygtail.readlines(), self.test_lines)
 
     def test_subsequent_read_with_no_new_data(self):
         pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(pygtail.read(), self.test_str)
-        self.assertEquals(pygtail.read(), None)
+        self.assertEqual(pygtail.read(), self.test_str)
+        self.assertEqual(pygtail.read(), None)
 
     def test_subsequent_read_with_new_data(self):
         pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(pygtail.read(), self.test_str)
+        self.assertEqual(pygtail.read(), self.test_str)
         new_lines = "4\n5\n"
         self.append(new_lines)
         new_pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(new_pygtail.read(), new_lines)
+        self.assertEqual(new_pygtail.read(), new_lines)
 
     def test_logrotate(self):
         new_lines = ["4\n5\n", "6\n7\n"]
@@ -58,7 +58,7 @@ class PygtailTest(unittest.TestCase):
         os.rename(self.logfile.name, "%s.1" % self.logfile.name)
         self.append(new_lines[1])
         pygtail = Pygtail(self.logfile.name)
-        self.assertEquals(pygtail.read(), ''.join(new_lines))
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
 
 
 def main():
