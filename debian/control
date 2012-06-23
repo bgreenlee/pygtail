@@ -2,9 +2,9 @@ Source: pygtail
 Section: python
 Priority: optional
 Maintainer: Brad Greenlee <brad@footle.org>
-Build-Depends: debhelper (>= 7)
-Build-Depends-Indep: python-support, python-setuptools
-Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 7.0.50~), python (>=2.6.6-3~), help2man
+Build-Depends-Indep: python-setuptools
+Standards-Version: 3.9.3
 Homepage: http://github.com/bgreenlee/pygtail
 
 Package: pygtail

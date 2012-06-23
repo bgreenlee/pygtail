@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@
+	dh --with python2 $@
 
 debian/pygtail.1: override_dh_auto_install
 	PYTHONPATH=. \
