@@ -1,0 +1,2 @@
+# work around #652617
+extend-diff-ignore="^[^/]+\.egg-info/"
