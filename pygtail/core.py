@@ -175,7 +175,8 @@ class Pygtail(object):
 def main():
     # command-line parsing
     cmdline = OptionParser(usage="usage: %prog [options] logfile",
-        description="Print log file lines that have not been read.")
+        description="Print log file lines that have not been read.",
+        version=__version__)
     cmdline.add_option("--offset-file", "-o", action="store",
         help="File to which offset data is written (default: <logfile>.offset).")
     cmdline.add_option("--paranoid", "-p", action="store_true",
