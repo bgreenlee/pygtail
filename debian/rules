@@ -1,4 +1,17 @@
 #!/usr/bin/make -f
 
 %:
-    dh $@
+	dh $@
+
+debian/pygtail.1: override_dh_auto_install
+	PYTHONPATH=. \
+	help2man \
+		--no-info \
+		--name "print lines in a logfile not previously printed" \
+		--include ./debian/pygtail.1.additional \
+		debian/python-pygtail/usr/bin/pygtail \
+		> $@
+
+override_dh_installman: ./debian/pygtail.1
+	# no real override, just declare dependency
+	dh_installman
