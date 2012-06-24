@@ -64,6 +64,7 @@ class Pygtail(object):
                 self._rotated_logfile = self._determine_rotated_logfile()
 
     def __del__(self):
+        self._update_offset_file()
         if self._filehandle():
             self._filehandle().close()
 
