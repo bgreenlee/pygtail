@@ -42,7 +42,7 @@ class Pygtail(object):
         self.paranoid = paranoid
         self._offset_file = offset_file or "%s.offset" % self.filename
 
-        self._follow = True
+        self._follow = follow
 
         self.restart()
 
