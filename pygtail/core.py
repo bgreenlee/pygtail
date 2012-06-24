@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from os import stat
+from os import stat, linesep
 from os.path import exists, getsize
 import sys
 import glob
@@ -73,8 +73,16 @@ class Pygtail(object):
         """
         Return the next line in the file, updating the offset.
         """
+
+        while True:
+            result = self._next()
+
+            if result is not None:
+                return result
+
+    def _next(self):
         try:
-            line = next(self._filehandle())
+            return next(self._filehandle())
         except StopIteration:
             # we've reached the end of the file; if we're processing the
             # rotated log file, we can continue with the actual file; otherwise
@@ -83,20 +91,16 @@ class Pygtail(object):
                 self._rotated_logfile = None
                 self._fh.close()
                 self._offset = 0
-                # open up current logfile and continue
-                try:
-                    line = next(self._filehandle())
-                except StopIteration:  # oops, empty file
-                    self._update_offset_file()
-                    raise
-            else:
+                # don't open up current logfile, just make the next() try again
+
+                return None
+
+            else: # we're in the real file, it's over for good
                 self._update_offset_file()
                 raise
-
-        if self.paranoid:
-            self._update_offset_file()
-
-        return line
+        finally:
+            if self.paranoid:
+                self._update_offset_file()
 
     def __next__(self):
         """`__next__` is the Python 3 version of `next`"""
