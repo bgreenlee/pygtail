@@ -27,6 +27,7 @@ from os.path import exists, getsize
 import sys
 import glob
 import string
+import time
 from optparse import OptionParser
 
 __version__ = '0.2.1'
@@ -116,9 +117,13 @@ class Pygtail(object):
 
                 return None
 
-            else: # we're in the real file, it's over for good
-                self._update_offset_file()
-                raise
+            else: # we're in the real file, it's over for good (at least for now)
+                if self._follow:
+                    time.sleep(self._follow)
+                    return None
+                else:
+                    self._update_offset_file()
+                    raise
         finally:
             if self.paranoid:
                 self._update_offset_file()
