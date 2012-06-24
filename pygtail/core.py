@@ -218,6 +218,9 @@ def main():
     cmdline.add_option("--paranoid", "-p", action="store_true",
         help="Update the offset file every time we read a line (as opposed to"
              " only when we reach the end of the file).")
+    cmdline.add_option("--follow", "-f", action="store_true",
+        help="Do not exit at the end of the file, but wait for new lines to be"
+             " written.")
 
     options, args = cmdline.parse_args()
 
@@ -226,7 +229,8 @@ def main():
 
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
-                      paranoid=options.paranoid)
+                      paranoid=options.paranoid,
+                      follow=options.follow)
     for line in pygtail:
         sys.stdout.write(line)
 
