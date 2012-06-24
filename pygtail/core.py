@@ -36,10 +36,16 @@ class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
     """
-    def __init__(self, filename, offset_file=None, paranoid=False):
+    def __init__(self, filename, offset_file=None, paranoid=False, follow=False):
         self.filename = filename
         self.paranoid = paranoid
         self._offset_file = offset_file or "%s.offset" % self.filename
+
+        self._follow = True
+
+        self.restart()
+
+    def restart(self):
         self._offset_file_inode = 0
         self._offset = 0
         self._fh = None
