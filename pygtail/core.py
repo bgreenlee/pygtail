@@ -22,11 +22,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from os import stat
+from os import stat, linesep
 from os.path import exists, getsize
 import sys
 import glob
 import string
+import time
 from optparse import OptionParser
 
 __version__ = '0.2.1'
@@ -36,10 +37,16 @@ class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
     """
-    def __init__(self, filename, offset_file=None, paranoid=False):
+    def __init__(self, filename, offset_file=None, paranoid=False, follow=False):
         self.filename = filename
         self.paranoid = paranoid
         self._offset_file = offset_file or "%s.offset" % self.filename
+
+        self._follow = follow
+
+        self.restart()
+
+    def restart(self):
         self._offset_file_inode = 0
         self._offset = 0
         self._fh = None
@@ -57,6 +64,7 @@ class Pygtail(object):
                 self._rotated_logfile = self._determine_rotated_logfile()
 
     def __del__(self):
+        self._update_offset_file()
         if self._filehandle():
             self._filehandle().close()
 
@@ -67,8 +75,37 @@ class Pygtail(object):
         """
         Return the next line in the file, updating the offset.
         """
+
+        while True:
+            result = self._next()
+
+            if result is not None:
+                return result
+
+    def _current_file_next_line(self):
+        fh = self._filehandle()
+        old_position = fh.tell()
+
         try:
-            line = next(self._filehandle())
+            line = next(fh)
+        except StopIteration:
+            # might look like a no-op as we're already there (given the file
+            # iterator just told us we're at EOF), but seeking there again
+            # restarts the iteration process. thus, when we next call this
+            # function an the file grew in the meantime, things will be up and
+            # running again.
+            fh.seek(old_position)
+            raise
+
+        if not line.endswith(linesep):
+            fh.seek(old_position)
+            raise StopIteration("Not at EOF yet, but nothing complete to yield either.")
+
+        return line
+
+    def _next(self):
+        try:
+            return self._current_file_next_line()
         except StopIteration:
             # we've reached the end of the file; if we're processing the
             # rotated log file, we can continue with the actual file; otherwise
@@ -77,20 +114,20 @@ class Pygtail(object):
                 self._rotated_logfile = None
                 self._fh.close()
                 self._offset = 0
-                # open up current logfile and continue
-                try:
-                    line = next(self._filehandle())
-                except StopIteration:  # oops, empty file
+                # don't open up current logfile, just make the next() try again
+
+                return None
+
+            else: # we're in the real file, it's over for good (at least for now)
+                if self._follow:
+                    time.sleep(self._follow)
+                    return None
+                else:
                     self._update_offset_file()
                     raise
-            else:
+        finally:
+            if self.paranoid:
                 self._update_offset_file()
-                raise
-
-        if self.paranoid:
-            self._update_offset_file()
-
-        return line
 
     def __next__(self):
         """`__next__` is the Python 3 version of `next`"""
@@ -175,12 +212,16 @@ class Pygtail(object):
 def main():
     # command-line parsing
     cmdline = OptionParser(usage="usage: %prog [options] logfile",
-        description="Print log file lines that have not been read.")
+        description="Print log file lines that have not been read.",
+        version=__version__)
     cmdline.add_option("--offset-file", "-o", action="store",
         help="File to which offset data is written (default: <logfile>.offset).")
     cmdline.add_option("--paranoid", "-p", action="store_true",
         help="Update the offset file every time we read a line (as opposed to"
              " only when we reach the end of the file).")
+    cmdline.add_option("--follow", "-f", action="store_true",
+        help="Do not exit at the end of the file, but wait for new lines to be"
+             " written.")
 
     options, args = cmdline.parse_args()
 
@@ -189,7 +230,8 @@ def main():
 
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
-                      paranoid=options.paranoid)
+                      paranoid=options.paranoid,
+                      follow=options.follow)
     for line in pygtail:
         sys.stdout.write(line)
 

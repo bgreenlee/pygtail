@@ -1,3 +1,9 @@
+pygtail (0.2.1-0+nmu1) unstable; urgency=low
+
+  * Various packaging enhancements.
+
+ -- Christian M. Amsüss <chrysn@fsfe.org>  Sat, 23 Jun 2012 13:00:41 +0200
+
 pygtail (0.2.1) lucid; urgency=low
 
   * Add ReStructuredText README for PyPi.
