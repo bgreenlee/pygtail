@@ -80,9 +80,30 @@ class Pygtail(object):
             if result is not None:
                 return result
 
+    def _current_file_next_line(self):
+        fh = self._filehandle()
+        old_position = fh.tell()
+
+        try:
+            line = next(fh)
+        except StopIteration:
+            # might look like a no-op as we're already there (given the file
+            # iterator just told us we're at EOF), but seeking there again
+            # restarts the iteration process. thus, when we next call this
+            # function an the file grew in the meantime, things will be up and
+            # running again.
+            fh.seek(old_position)
+            raise
+
+        if not line.endswith(linesep):
+            fh.seek(old_position)
+            raise StopIteration("Not at EOF yet, but nothing complete to yield either.")
+
+        return line
+
     def _next(self):
         try:
-            return next(self._filehandle())
+            return self._current_file_next_line()
         except StopIteration:
             # we've reached the end of the file; if we're processing the
             # rotated log file, we can continue with the actual file; otherwise
