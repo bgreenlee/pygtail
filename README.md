@@ -23,8 +23,6 @@ From the command line:
       -p, --paranoid        Update the offset file every time we read a line 
                             (as opposed to only when we reach the end of the
                             file).
-      -f, --follow          Do not exit at the end of the file, but wait for
-                            new lines to be written.
 
 In your code:
 
@@ -43,8 +41,6 @@ configure your log rotation script so that the most recently rotated log is
 left uncompressed (`logrotated`, for example, has a `delaycompress` option
 that does just that).
 
-The "following" feature is implemented using one-second sleeps, as it was the
-case with `tail -f` before coreutils 7.5. An extension to inotify would be nice.
 
 Build status
 ------------

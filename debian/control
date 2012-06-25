@@ -2,15 +2,12 @@ Source: pygtail
 Section: python
 Priority: optional
 Maintainer: Brad Greenlee <brad@footle.org>
-Build-Depends: debhelper (>= 7.0.50~), python (>=2.6.6-3~), help2man
-Build-Depends-Indep: python-setuptools
-Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 7)
+Build-Depends-Indep: python-support, python-setuptools
+Standards-Version: 3.8.3
 Homepage: http://github.com/bgreenlee/pygtail
 
-Package: python-pygtail
+Package: pygtail
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
-Description: Reads log file lines that have not been read
- pygtail is a Python library for reading lines from log files in a way that
- every line only gets handled once. It can be run both as a Python library
- (providing an iterator for the log file) and as a standalone tool, pygtail.
+Description: Reads log file lines that have not been read.
