@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from os import stat
+from os import stat, fstat
 from os.path import exists, getsize
 import sys
 import glob
@@ -56,6 +56,9 @@ class Pygtail(object):
                 # Look for the rotated file and process that if we find it.
                 self._rotated_logfile = self._determine_rotated_logfile()
 
+        # test that this works, allow exceptions to propergate at this point
+        self._filehandle()
+
     def __del__(self):
         if self._filehandle():
             self._filehandle().close()
@@ -67,8 +70,9 @@ class Pygtail(object):
         """
         Return the next line in the file, updating the offset.
         """
-
+        
         fh = self._filehandle()
+
 
         start_pos = fh.tell()
         line = fh.readline()
@@ -86,15 +90,43 @@ class Pygtail(object):
                 line = self.next()
 
         else:
-            if incomplete:
-                fh.seek(start_pos)
-                if self.paranoid:
-                    self._update_offset_file()
-                raise StopIteration()
 
-            if eof:
-                self._update_offset_file()
-                raise StopIteration()
+            if incomplete or eof:
+
+                fh_ino = fstat(fh.fileno()).st_ino
+
+                current_ino = None
+                try:
+                    current_ino = stat(self.filename).st_ino
+                except OSError:
+                    pass
+
+                # note: if the current_ino is None it means the new file
+                # has not being created and there is a possibility that
+                # the logging process is still writing to the old file
+                if (current_ino is not None) and (fh_ino != current_ino):
+                    # things have moved! (assume rotation event)
+
+                    # in this case it is the end of reading this file,
+                    # an eof means we want to open the file again and
+                    # read the first line. An incomplete line should be
+                    # returned 
+                    self._fh.close()
+                    if eof:
+                        line = self.next()
+
+                else:
+
+                    # the file is current but we either need to wait for more
+                    # writing to emit a line. if incomplete line seek 
+                    # the bigining of the line.
+
+                    if incomplete:
+                        fh.seek(start_pos)
+
+                    self._update_offset_file()
+
+                    raise StopIteration()
 
         if self.paranoid:
             self._update_offset_file()
@@ -139,8 +171,9 @@ class Pygtail(object):
         """
         Update the offset file with the current inode and offset.
         """
-        offset = self._filehandle().tell()
-        inode = stat(self.filename).st_ino
+        fh = self._filehandle()
+        offset = fh.tell()
+        inode = fstat(fh.fileno()).st_ino
         fh = open(self._offset_file, "w")
         fh.write("%s\n%s\n" % (inode, offset))
         fh.close()
