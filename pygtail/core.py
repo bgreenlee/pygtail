@@ -67,30 +67,41 @@ class Pygtail(object):
         """
         Return the next line in the file, updating the offset.
         """
-        try:
-            line = next(self._filehandle())
-        except StopIteration:
-            # we've reached the end of the file; if we're processing the
-            # rotated log file, we can continue with the actual file; otherwise
-            # update the offset file
-            if self._rotated_logfile:
+
+        fh = self._filehandle()
+
+        start_pos = fh.tell()
+        line = fh.readline()
+
+        eof = line == ''
+        incomplete = not line.endswith('\n')
+
+        if self._rotated_logfile:
+            if eof:
                 self._rotated_logfile = None
                 self._fh.close()
                 self._offset = 0
+                
                 # open up current logfile and continue
-                try:
-                    line = next(self._filehandle())
-                except StopIteration:  # oops, empty file
+                line = self.next()
+
+        else:
+            if incomplete:
+                fh.seek(start_pos)
+                if self.paranoid:
                     self._update_offset_file()
-                    raise
-            else:
+                raise StopIteration()
+
+            if eof:
                 self._update_offset_file()
-                raise
+                raise StopIteration()
 
         if self.paranoid:
             self._update_offset_file()
 
         return line
+
+
 
     def __next__(self):
         """`__next__` is the Python 3 version of `next`"""
