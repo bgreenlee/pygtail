@@ -77,6 +77,7 @@ class Pygtail(object):
                 self._rotated_logfile = None
                 self._fh.close()
                 self._offset = 0
+                self._update_offset_file()
                 # open up current logfile and continue
                 try:
                     line = next(self._filehandle())
@@ -148,35 +149,30 @@ class Pygtail(object):
 
     def _check_rotated_filename_candidates(self):
         """
-        Check for various rotated logfile filename patterns and return the first
-        match we find.
+        Check for various rotated logfile filename patterns and return the 
+        matches we find.
         """
+        candidates=[]
         # savelog(8)
         candidate = "%s.0" % self.filename
         if (exists(candidate) and exists("%s.1.gz" % self.filename) and
             (stat(candidate).st_mtime > stat("%s.1.gz" % self.filename).st_mtime)):
-            return candidate
+            candidates.append(candidate)
 
         # logrotate(8)
         candidate = "%s.1" % self.filename
         if exists(candidate):
-            return candidate
+            candidates.append(candidate)
 
         # dateext rotation scheme
-        candidates = glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename)
-        if candidates:
-            candidates.sort()
-            return candidates[-1]  # return most recent
+        for candidate in glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename):
+            candidates.append(candidate)
 
         # for TimedRotatingFileHandler
-        candidates = glob.glob("%s.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" % self.filename)
-        if candidates:
-            candidates.sort()
-            return candidates[-1]  # return most recent
+        for candidate in glob.glob("%s.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" % self.filename):
+            candidates.append(candidate)
 
-        # no match
-        return None
-
+        return candidates
 
 def main():
     # command-line parsing
