@@ -36,9 +36,10 @@ class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
     """
-    def __init__(self, filename, offset_file=None, paranoid=False):
+    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=False):
         self.filename = filename
         self.paranoid = paranoid
+        self.copytruncate = copytruncate
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -51,8 +52,10 @@ class Pygtail(object):
             (self._offset_file_inode, self._offset) = \
                 [int(line.strip()) for line in offset_fh]
             offset_fh.close()
-            if self._offset_file_inode != stat(self.filename).st_ino:
-                # The inode has changed, so the file might have been rotated.
+            if self._offset_file_inode != stat(self.filename).st_ino or \
+                    stat(self.filename).st_size < self._offset:
+                # The inode has changed or filesize has reduced so the file
+                # might have been rotated.
                 # Look for the rotated file and process that if we find it.
                 self._rotated_logfile = self._determine_rotated_logfile()
 
@@ -140,11 +143,13 @@ class Pygtail(object):
         rotated filename is, and return it.
         """
         rotated_filename = self._check_rotated_filename_candidates()
-        if (rotated_filename and exists(rotated_filename) and
-            stat(rotated_filename).st_ino == self._offset_file_inode):
-            return rotated_filename
-        else:
-            return None
+        if rotated_filename and exists(rotated_filename):
+            if stat(rotated_filename).st_ino == self._offset_file_inode:
+                return rotated_filename
+            elif self.copytruncate and \
+                    stat(self.filename).st_ino == self._offset_file_inode:
+                return rotated_filename
+        return None
 
     def _check_rotated_filename_candidates(self):
         """
