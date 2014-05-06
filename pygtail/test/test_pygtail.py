@@ -71,6 +71,7 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         pygtail.read()
         self.append(new_lines[0])
+        # note it doesn't matter what filename the file gets rotated to
         os.rename(self.logfile.name, "%s.somethingodd" % self.logfile.name)
         self.append(new_lines[1])
         self.assertEqual(pygtail.read(), ''.join(new_lines))
@@ -115,7 +116,7 @@ class PygtailTest(unittest.TestCase):
         self.copytruncate()
         self.append(new_lines[1])
         read2 = pygtail.read()
-        self.assertEqual((read1,read2), new_lines)
+        self.assertEqual([read1,read2], new_lines)
 
 
 def main():

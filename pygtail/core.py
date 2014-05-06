@@ -101,13 +101,15 @@ class Pygtail(object):
                 current_ino = None
                 try:
                     current_ino = stat(self.filename).st_ino
+                    current_size = stat(self.filename).st_size
                 except OSError:
                     pass
 
                 # note: if the current_ino is None it means the new file
                 # has not being created and there is a possibility that
                 # the logging process is still writing to the old file
-                if (current_ino is not None) and (fh_ino != current_ino):
+                if (current_ino is not None) and \
+                        ((fh_ino != current_ino) or self.copytruncate and current_size < start_pos):
                     # things have moved! (assume rotation event)
 
                     # in this case it is the end of reading this file,
@@ -115,6 +117,7 @@ class Pygtail(object):
                     # read the first line. An incomplete line should be
                     # returned 
                     self._fh.close()
+                    self._offset = 0
                     if eof:
                         line = self.next()
 
@@ -122,7 +125,7 @@ class Pygtail(object):
 
                     # the file is current but we either need to wait for more
                     # writing to emit a line. if incomplete line seek 
-                    # the bigining of the line.
+                    # the beginning of the line.
 
                     if incomplete:
                         fh.seek(start_pos)
