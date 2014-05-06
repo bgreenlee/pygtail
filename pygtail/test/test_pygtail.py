@@ -60,6 +60,15 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
+    def test_logrotate_without_close(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+        os.rename(self.logfile.name, "%s.somethingodd" % self.logfile.name)
+        self.append(new_lines[1])
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
 
 def main():
     unittest.main()
