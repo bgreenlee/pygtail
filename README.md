@@ -46,9 +46,6 @@ Logrotation which moves the old log, or renames it in a nonstandard way will
 only work if you invoke Pygtail once. ie using the offset file won't work since
 Pygtail won't know where to locate your old log file.
 
-Tailing a rotated file won't work with copytruncate set on logrotate or where the
-same file is wiped and rewritten to.
-
 
 
 Build status
