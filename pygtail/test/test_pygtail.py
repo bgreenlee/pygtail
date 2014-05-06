@@ -1,5 +1,6 @@
 import os
 import unittest
+import shutil
 import tempfile
 from pygtail import Pygtail
 
@@ -21,6 +22,11 @@ class PygtailTest(unittest.TestCase):
         # append the give string to the temp logfile
         fh = open(self.logfile.name, "a")
         fh.write(str)
+        fh.close()
+
+    def copytruncate(self):
+        shutil.copyfile(self.logfile.name, "%s.1" % self.logfile.name)
+        fh = open(self.logfile.name, "w")
         fh.close()
 
     def tearDown(self):
@@ -68,6 +74,48 @@ class PygtailTest(unittest.TestCase):
         os.rename(self.logfile.name, "%s.somethingodd" % self.logfile.name)
         self.append(new_lines[1])
         self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_copytruncate_off_smaller(self):
+        self.test_readlines()
+        self.copytruncate()
+        new_lines = "4\n5\n"
+        self.append(new_lines)
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), None)
+
+    def test_copytruncate_on_smaller(self):
+        self.test_readlines()
+        self.copytruncate()
+        new_lines = "4\n5\n"
+        self.append(new_lines)
+        pygtail = Pygtail(self.logfile.name, copytruncate=True)
+        self.assertEqual(pygtail.read(), new_lines)
+
+    def _test_copytruncate_larger(self, onoff):
+        self.test_readlines()
+        self.copytruncate()
+        self.append(self.test_str)
+        new_lines = "4\n5\n"
+        self.append(new_lines)
+        pygtail = Pygtail(self.logfile.name, copytruncate=onoff)
+        self.assertEqual(pygtail.read(), new_lines)
+
+    def test_copytruncate_larger_off(self):
+        self._test_copytruncate_larger(False)
+
+    def test_copytruncate_larger_on(self):
+        self._test_copytruncate_larger(True)
+
+    def test_copytruncate_off_smaller_without_close(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name, copytruncate=True)
+        pygtail.read()
+        self.append(new_lines[0])
+        read1 = pygtail.read()
+        self.copytruncate()
+        self.append(new_lines[1])
+        read2 = pygtail.read()
+        self.assertEqual((read1,read2), new_lines)
 
 
 def main():

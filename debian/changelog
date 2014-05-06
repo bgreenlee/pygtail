@@ -1,3 +1,9 @@
+pygtail (0.2.2) lucid; urgency=low
+
+  * Add parsing support for python's TimedRotatingFileHandler (contributed by https://github.com/darknight)
+
+ -- Brad Greenlee <brad@footle.org>  Wed, 21 Aug 2013 15:50:00 -0700
+
 pygtail (0.2.1) lucid; urgency=low
 
   * Add ReStructuredText README for PyPi.

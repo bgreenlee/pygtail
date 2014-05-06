@@ -1,0 +1,6 @@
+To update the version on PyPi:
+
+1. Update __version__ in pygtail/core.py
+2. Update debian/changelog
+3. python setup.py register
+4. python setup.py sdist upload
