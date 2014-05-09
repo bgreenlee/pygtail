@@ -1,3 +1,9 @@
+pygtail (0.3.0) lucid; urgency=low
+
+  * Add support for copytruncate style logrotation (contributed by https://github.com/atward)
+
+ -- Brad Greenlee <brad@footle.org>  Fri, 9 May 2014 16:00:00 -0700
+
 pygtail (0.2.2) lucid; urgency=low
 
   * Add parsing support for python's TimedRotatingFileHandler (contributed by https://github.com/darknight)

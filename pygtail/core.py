@@ -29,7 +29,7 @@ import glob
 import string
 from optparse import OptionParser
 
-__version__ = '0.2.2'
+__version__ = '0.3.0'
 
 
 class Pygtail(object):
