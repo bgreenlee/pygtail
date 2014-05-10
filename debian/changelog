@@ -1,3 +1,11 @@
+pygtail (0.4.0) lucid; urgency=low
+
+  * Make support for copytruncate log rotation the default.
+  * Add --no-copytruncate commandline switch.
+  * Print warning if copytruncate is disabled and the log file shrinks
+
+ -- Brad Greenlee <brad@footle.org>  Fri, 9 May 2014 17:31:00 -0700
+
 pygtail (0.3.0) lucid; urgency=low
 
   * Add support for copytruncate style logrotation (contributed by https://github.com/atward)

@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 import shutil
 import tempfile
@@ -71,8 +72,9 @@ class PygtailTest(unittest.TestCase):
         self.copytruncate()
         new_lines = "4\n5\n"
         self.append(new_lines)
-        pygtail = Pygtail(self.logfile.name)
+        pygtail = Pygtail(self.logfile.name, copytruncate=False)
         self.assertEqual(pygtail.read(), None)
+        self.assertRegexpMatches(sys.stderr.getvalue(), r".*?\bWARN\b.*?\bshrank\b.*")
 
     def test_copytruncate_on_smaller(self):
         self.test_readlines()
@@ -99,7 +101,7 @@ class PygtailTest(unittest.TestCase):
 
 
 def main():
-    unittest.main()
+    unittest.main(buffer=True)
 
 
 if __name__ == "__main__":

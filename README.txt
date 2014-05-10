@@ -1,7 +1,7 @@
 pygtail
 =======
 
-A python "port" of `logcheck's logtail2 <http://logcheck.org>`_.
+A python "port" of `logcheck's logtail2 <http://logcheck.org>`__.
 
 Pygtail reads log file lines that have not been read. It will even
 handle log files that have been rotated.
@@ -22,13 +22,15 @@ From the command line:
       -o OFFSET_FILE, --offset-file=OFFSET_FILE
                             File to which offset data is written (default:
                             <logfile>.offset).
-      -p, --paranoid        Update the offset file every time we read a line 
+      -p, --paranoid        Update the offset file every time we read a line
                             (as opposed to only when we reach the end of the
                             file).
+      --no-copytruncate     Don't support copytruncate-style log rotation.
+                            Instead, if the log file shrinks, print a warning.
 
 In your code:
 
-::
+.. code:: python
 
     from pygtail import Pygtail
 
@@ -42,3 +44,11 @@ Pygtail does not handle rotated logs that have been compressed. You
 should configure your log rotation script so that the most recently
 rotated log is left uncompressed (``logrotated``, for example, has a
 ``delaycompress`` option that does just that).
+
+Build status
+------------
+
+|Build Status|
+
+.. |Build Status| image:: https://secure.travis-ci.org/bgreenlee/pygtail.png
+   :target: http://travis-ci.org/bgreenlee/pygtail

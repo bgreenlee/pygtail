@@ -29,14 +29,20 @@ import glob
 import string
 from optparse import OptionParser
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 
 class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
+
+    Keyword arguments:
+    offset_file   File to which offset data is written (default: <logfile>.offset).
+    paranoid      Update the offset file every time we read a line (as opposed to
+                  only when we reach the end of the file (default: False)
+    copytruncate  Support copytruncate-style log rotation (default: True)
     """
-    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=False):
+    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True):
         self.filename = filename
         self.paranoid = paranoid
         self.copytruncate = copytruncate
@@ -146,9 +152,18 @@ class Pygtail(object):
         if rotated_filename and exists(rotated_filename):
             if stat(rotated_filename).st_ino == self._offset_file_inode:
                 return rotated_filename
-            elif self.copytruncate and \
-                    stat(self.filename).st_ino == self._offset_file_inode:
-                return rotated_filename
+
+            # if the inode hasn't changed, then the file shrank; this is expected with copytruncate,
+            # otherwise print a warning
+            if stat(self.filename).st_ino == self._offset_file_inode:
+                if self.copytruncate:
+                    return rotated_filename
+                else:
+                    sys.stderr.write(
+                        "[pygtail] [WARN] file size of %s shrank, and copytruncate support is "
+                        "disabled (expected at least %d bytes, was %d bytes).\n" %
+                        (self.filename, self._offset, stat(self.filename).st_size))
+
         return None
 
     def _check_rotated_filename_candidates(self):
@@ -192,6 +207,9 @@ def main():
     cmdline.add_option("--paranoid", "-p", action="store_true",
         help="Update the offset file every time we read a line (as opposed to"
              " only when we reach the end of the file).")
+    cmdline.add_option("--no-copytruncate", action="store_true",
+        help="Don't support copytruncate-style log rotation. Instead, if the log file"
+             " shrinks, print a warning.")
 
     options, args = cmdline.parse_args()
 
@@ -200,7 +218,9 @@ def main():
 
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
-                      paranoid=options.paranoid)
+                      paranoid=options.paranoid,
+                      copytruncate=not options.no_copytruncate)
+
     for line in pygtail:
         sys.stdout.write(line)
 
