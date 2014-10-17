@@ -249,8 +249,14 @@ def main():
     cmdline.add_option("--no-copytruncate", action="store_true",
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
              " shrinks, print a warning.")
+    cmdline.add_option("--version", action="store_true",
+        help="Print version and exit.")
 
     options, args = cmdline.parse_args()
+
+    if options.version:
+        print "pygtail version %s" % __version__
+        sys.exit(0)
 
     if (len(args) != 1):
         cmdline.error("Please provide a logfile to read.")
