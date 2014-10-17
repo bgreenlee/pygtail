@@ -1,9 +1,17 @@
 import os
 import sys
-import unittest
+try:
+    # python 2.6
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 import shutil
 import tempfile
+import gzip
+import io
 from pygtail import Pygtail
+
+PY2 = sys.version_info[0] == 2
 
 
 class PygtailTest(unittest.TestCase):
@@ -32,7 +40,7 @@ class PygtailTest(unittest.TestCase):
 
     def tearDown(self):
         filename = self.logfile.name
-        for tmpfile in [filename, filename + ".offset", filename + ".1"]:
+        for tmpfile in [filename, filename + ".offset", filename + ".1", filename + ".1.gz"]:
             if os.path.exists(tmpfile):
                 os.remove(tmpfile)
 
@@ -57,7 +65,27 @@ class PygtailTest(unittest.TestCase):
         new_pygtail = Pygtail(self.logfile.name)
         self.assertEqual(new_pygtail.read(), new_lines)
 
-    def test_logrotate(self):
+    def test_logrotate_without_delay_compress(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+
+        # put content to gzip file
+        gzip_handle = gzip.open("%s.1.gz" % self.logfile.name, 'wb')
+        with open(self.logfile.name, 'rb') as logfile:
+            gzip_handle.write(logfile.read())
+        gzip_handle.close()
+
+        with open(self.logfile.name, 'w'):
+            # truncate file
+            pass
+
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_logrotate_with_delay_compress(self):
         new_lines = ["4\n5\n", "6\n7\n"]
         pygtail = Pygtail(self.logfile.name)
         pygtail.read()
@@ -72,9 +100,14 @@ class PygtailTest(unittest.TestCase):
         self.copytruncate()
         new_lines = "4\n5\n"
         self.append(new_lines)
+
+        sys.stderr = captured = io.BytesIO() if PY2 else io.StringIO()
         pygtail = Pygtail(self.logfile.name, copytruncate=False)
+        captured_value = captured.getvalue()
+        sys.stderr = sys.__stderr__
+
+        self.assertRegexpMatches(captured_value, r".*?\bWARN\b.*?\bshrank\b.*")
         self.assertEqual(pygtail.read(), None)
-        self.assertRegexpMatches(sys.stderr.getvalue(), r".*?\bWARN\b.*?\bshrank\b.*")
 
     def test_copytruncate_on_smaller(self):
         self.test_readlines()
