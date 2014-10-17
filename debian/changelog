@@ -1,3 +1,9 @@
+pygtail (0.5.0) lucid; urgency=low
+
+  * Add handling of rotated and immediately compressed files (thanks @NotSqrt)
+
+ -- Brad Greenlee <brad@footle.org>  Fri, 17 October 2014 09:39:00 -0700
+
 pygtail (0.4.0) lucid; urgency=low
 
   * Make support for copytruncate log rotation the default.

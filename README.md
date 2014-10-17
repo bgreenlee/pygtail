@@ -35,14 +35,6 @@ for line in Pygtail("some.log"):
     sys.stdout.write(line)
 ```
 
-Notes
------
-
-Pygtail does not handle rotated logs that have been compressed. You should
-configure your log rotation script so that the most recently rotated log is
-left uncompressed (`logrotated`, for example, has a `delaycompress` option
-that does just that).
-
 
 Build status
 ------------
