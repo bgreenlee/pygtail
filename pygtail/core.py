@@ -27,9 +27,24 @@ from os.path import exists, getsize
 import sys
 import glob
 import string
+import gzip
 from optparse import OptionParser
 
 __version__ = '0.4.0'
+
+
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    text_type = str
+else:
+    text_type = unicode
+
+
+def force_text(s, encoding='utf-8', errors='strict'):
+    if isinstance(s, text_type):
+        return s
+    return s.decode(encoding, errors)
 
 
 class Pygtail(object):
@@ -117,18 +132,36 @@ class Pygtail(object):
         """
         lines = self.readlines()
         if lines:
-            return ''.join(lines)
+            try:
+                return ''.join(lines)
+            except TypeError:
+                return ''.join(force_text(line) for line in lines)
         else:
             return None
+
+    def _is_closed(self):
+        if not self._fh:
+            return True
+        try:
+            return self._fh.closed
+        except AttributeError:
+            if isinstance(self._fh, gzip.GzipFile):
+                # python 2.6
+                return self._fh.fileobj is None
+            else:
+                raise
 
     def _filehandle(self):
         """
         Return a filehandle to the file being tailed, with the position set
         to the current offset.
         """
-        if not self._fh or self._fh.closed:
+        if not self._fh or self._is_closed():
             filename = self._rotated_logfile or self.filename
-            self._fh = open(filename, "r")
+            if filename.endswith('.gz'):
+                self._fh = gzip.open(filename, 'r')
+            else:
+                self._fh = open(filename, "r")
             self._fh.seek(self._offset)
 
         return self._fh
@@ -178,7 +211,13 @@ class Pygtail(object):
             return candidate
 
         # logrotate(8)
+        # with delaycompress
         candidate = "%s.1" % self.filename
+        if exists(candidate):
+            return candidate
+
+        # without delaycompress
+        candidate = "%s.1.gz" % self.filename
         if exists(candidate):
             return candidate
 
