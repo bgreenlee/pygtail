@@ -255,7 +255,7 @@ def main():
     options, args = cmdline.parse_args()
 
     if options.version:
-        print "pygtail version %s" % __version__
+        print("pygtail version", __version__)
         sys.exit(0)
 
     if (len(args) != 1):
