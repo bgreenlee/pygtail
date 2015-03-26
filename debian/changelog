@@ -1,3 +1,9 @@
+pygtail (0.5.2) lucid; urgency=medium
+
+  * Fixed issue with potentially incorrect offset due to python's read-ahead buffer (thanks @czchen)
+
+ -- Brad Greenlee <brad@footle.org>  Thu, 26 March 2015 09:10:36 -0400
+
 pygtail (0.5.1) lucid; urgency=low
 
   * Fixed print statement to be Python 3 compatible (thanks @benburry)
