@@ -132,6 +132,28 @@ class PygtailTest(unittest.TestCase):
     def test_copytruncate_larger_on(self):
         self._test_copytruncate_larger(True)
 
+    def test_offset_file(self):
+        pygtail = Pygtail(self.logfile.name, paranoid=True)
+
+        log_inode = os.stat(self.logfile.name).st_ino
+
+        next(pygtail)
+        with open(self.logfile.name + '.offset', 'r') as f:
+            inode, offset = int(next(f)), int(next(f))
+        self.assertEqual(inode, log_inode)
+        self.assertEqual(offset, 2)
+
+        next(pygtail)
+        with open(self.logfile.name + '.offset', 'r') as f:
+            inode, offset = int(next(f)), int(next(f))
+        self.assertEqual(inode, log_inode)
+        self.assertEqual(offset, 4)
+
+        next(pygtail)
+        with open(self.logfile.name + '.offset', 'r') as f:
+            inode, offset = int(next(f)), int(next(f))
+        self.assertEqual(inode, log_inode)
+        self.assertEqual(offset, 6)
 
 def main():
     unittest.main(buffer=True)
