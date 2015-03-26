@@ -92,7 +92,7 @@ class Pygtail(object):
         Return the next line in the file, updating the offset.
         """
         try:
-            line = next(self._filehandle())
+            line = self._get_next_line()
         except StopIteration:
             # we've reached the end of the file; if we're processing the
             # rotated log file, we can continue with the actual file; otherwise
@@ -103,7 +103,7 @@ class Pygtail(object):
                 self._offset = 0
                 # open up current logfile and continue
                 try:
-                    line = next(self._filehandle())
+                    line = self._get_next_line()
                 except StopIteration:  # oops, empty file
                     self._update_offset_file()
                     raise
@@ -236,6 +236,11 @@ class Pygtail(object):
         # no match
         return None
 
+    def _get_next_line(self):
+        line = self._filehandle().readline()
+        if not line:
+            raise StopIteration
+        return line
 
 def main():
     # command-line parsing
