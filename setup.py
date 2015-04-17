@@ -12,7 +12,6 @@ def main():
     setup(
         name = 'pygtail',
         version = __version__,
-        use_2to3=True,
         description = 'Reads log file lines that have not been read.',
         license = 'GPL v2',
         author = 'Brad Greenlee',

@@ -106,7 +106,8 @@ class PygtailTest(unittest.TestCase):
         captured_value = captured.getvalue()
         sys.stderr = sys.__stderr__
 
-        self.assertRegexpMatches(captured_value, r".*?\bWARN\b.*?\bshrank\b.*")
+        assert_class = self.assertRegex if sys.version_info >= (3, 1) else self.assertRegexpMatches
+        assert_class(captured_value, r".*?\bWARN\b.*?\bshrank\b.*")
         self.assertEqual(pygtail.read(), None)
 
     def test_copytruncate_on_smaller(self):
