@@ -76,10 +76,14 @@ class Pygtail(object):
             offset_fh.close()
             if self._offset_file_inode != stat(self.filename).st_ino or \
                     stat(self.filename).st_size < self._offset:
-                # The inode has changed or filesize has reduced so the file
-                # might have been rotated.
+                # The inode has changed or filesize has reduced so we will
+                # assume the file rotated.
                 # Look for the rotated file and process that if we find it.
                 self._rotated_logfile = self._determine_rotated_logfile()
+                # If we failed to find the rotated file, we should set our
+                # offset to 0 and process the existing file from there.
+                if not self._rotated_logfile:
+                    self._offset = 0
 
     def __del__(self):
         if self._filehandle():
