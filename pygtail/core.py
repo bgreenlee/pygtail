@@ -58,10 +58,11 @@ class Pygtail(object):
                   only when we reach the end of the file (default: False)
     copytruncate  Support copytruncate-style log rotation (default: True)
     """
-    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True):
+    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True, encoding=None):
         self.filename = filename
         self.paranoid = paranoid
         self.copytruncate = copytruncate
+        self.encoding = encoding
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -160,9 +161,9 @@ class Pygtail(object):
         if not self._fh or self._is_closed():
             filename = self._rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self._fh = gzip.open(filename, 'r')
+                self._fh = gzip.open(filename, 'r', encoding=self.encoding)
             else:
-                self._fh = open(filename, "r")
+                self._fh = open(filename, "r", encoding=self.encoding)
             self._fh.seek(self._offset)
 
         return self._fh
@@ -255,6 +256,9 @@ def main():
     cmdline.add_option("--no-copytruncate", action="store_true",
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
              " shrinks, print a warning.")
+    cmdline.add_option("--encoding", "-e", action="store",
+        help="Specify encoding to use when opening the logfile (default: encoding"
+             " returned by locale.getpreferredencoding(False))")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -270,7 +274,8 @@ def main():
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
                       paranoid=options.paranoid,
-                      copytruncate=not options.no_copytruncate)
+                      copytruncate=not options.no_copytruncate,
+                      encoding=options.encoding)
 
     for line in pygtail:
         sys.stdout.write(line)

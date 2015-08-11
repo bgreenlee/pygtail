@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 try:
@@ -155,6 +157,14 @@ class PygtailTest(unittest.TestCase):
             inode, offset = int(next(f)), int(next(f))
         self.assertEqual(inode, log_inode)
         self.assertEqual(offset, 6)
+
+    def test_read_utf8(self):
+        pygtail = Pygtail(self.logfile.name, encoding="utf8")
+        self.assertEqual(pygtail.read(), self.test_str)
+        new_lines = "👍\n5\n"
+        self.append(new_lines)
+        new_pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(new_pygtail.read(), new_lines)
 
 def main():
     unittest.main(buffer=True)
