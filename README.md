@@ -23,6 +23,9 @@ From the command line:
       -p, --paranoid        Update the offset file every time we read a line
                             (as opposed to only when we reach the end of the
                             file).
+      -n N, --every-n=N     Update the offset file every N'th time we read a
+                            line (as opposed to only when we reach the end of
+                            the file).
       --no-copytruncate     Don't support copytruncate-style log rotation.
                             Instead, if the log file shrinks, print a warning.
 

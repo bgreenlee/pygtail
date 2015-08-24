@@ -27,11 +27,10 @@ from os import stat
 from os.path import exists, getsize
 import sys
 import glob
-import string
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.5.3'
+__version__ = '0.5.4'
 
 
 PY3 = sys.version_info[0] == 3
@@ -55,16 +54,23 @@ class Pygtail(object):
     Keyword arguments:
     offset_file   File to which offset data is written (default: <logfile>.offset).
     paranoid      Update the offset file every time we read a line (as opposed to
-                  only when we reach the end of the file (default: False)
+                  only when we reach the end of the file (default: False))
+    every_n       Update the offset file every n'th line (as opposed to only when
+                  we reach the end of the file (default: 0))
+    on_update     Execute this function when offset data is written (default False)
     copytruncate  Support copytruncate-style log rotation (default: True)
     """
-    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True):
+    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
+                 every_n=0, on_update=False):
         self.filename = filename
         self.paranoid = paranoid
+        self.every_n = every_n
+        self.on_update = on_update
         self.copytruncate = copytruncate
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
+        self._since_update = 0
         self._fh = None
         self._rotated_logfile = None
 
@@ -113,6 +119,8 @@ class Pygtail(object):
                 raise
 
         if self.paranoid:
+            self._update_offset_file()
+        elif self.every_n and self.every_n <= self._since_update:
             self._update_offset_file()
 
         return line
@@ -171,11 +179,14 @@ class Pygtail(object):
         """
         Update the offset file with the current inode and offset.
         """
+        if self.on_update:
+            self.on_update()
         offset = self._filehandle().tell()
         inode = stat(self.filename).st_ino
         fh = open(self._offset_file, "w")
         fh.write("%s\n%s\n" % (inode, offset))
         fh.close()
+        self._since_update = 0
 
     def _determine_rotated_logfile(self):
         """
@@ -241,7 +252,9 @@ class Pygtail(object):
         line = self._filehandle().readline()
         if not line:
             raise StopIteration
+        self._since_update += 1
         return line
+
 
 def main():
     # command-line parsing
@@ -251,6 +264,9 @@ def main():
         help="File to which offset data is written (default: <logfile>.offset).")
     cmdline.add_option("--paranoid", "-p", action="store_true",
         help="Update the offset file every time we read a line (as opposed to"
+             " only when we reach the end of the file).")
+    cmdline.add_option("--every-n", "-n", action="store",
+        help="Update the offset file every n'th time we read a line (as opposed to"
              " only when we reach the end of the file).")
     cmdline.add_option("--no-copytruncate", action="store_true",
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
@@ -267,9 +283,12 @@ def main():
     if (len(args) != 1):
         cmdline.error("Please provide a logfile to read.")
 
+    if options.every_n:
+        options.every_n = int(options.every_n)
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
                       paranoid=options.paranoid,
+                      every_n=options.every_n
                       copytruncate=not options.no_copytruncate)
 
     for line in pygtail:
