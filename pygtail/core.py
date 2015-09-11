@@ -58,10 +58,11 @@ class Pygtail(object):
                   only when we reach the end of the file (default: False)
     copytruncate  Support copytruncate-style log rotation (default: True)
     """
-    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True):
+    def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True, additionalRotatePatterns=[]):
         self.filename = filename
         self.paranoid = paranoid
         self.copytruncate = copytruncate
+        self.additionalRotatePatterns = additionalRotatePatterns
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -233,6 +234,12 @@ class Pygtail(object):
         if candidates:
             candidates.sort()
             return candidates[-1]  # return most recent
+
+        for pattern in self.additionalRotatePatterns:
+            candidates = glob.glob("%s%s" % (self.filename, pattern))
+            if candidates:
+                candidates.sort()
+                return candidates[-1] #return most recent
 
         # no match
         return None
