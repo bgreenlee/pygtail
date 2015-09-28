@@ -288,7 +288,7 @@ def main():
     pygtail = Pygtail(args[0],
                       offset_file=options.offset_file,
                       paranoid=options.paranoid,
-                      every_n=options.every_n
+                      every_n=options.every_n,
                       copytruncate=not options.no_copytruncate)
 
     for line in pygtail:
