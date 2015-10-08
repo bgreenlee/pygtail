@@ -17,7 +17,6 @@ PY2 = sys.version_info[0] == 2
 class PygtailTest(unittest.TestCase):
     # TODO:
     # - test for non-default offset file
-    # - test for paranoid flag
     # - test for savelog and datext rotation schemes
 
     def setUp(self):
@@ -155,6 +154,53 @@ class PygtailTest(unittest.TestCase):
             inode, offset = int(next(f)), int(next(f))
         self.assertEqual(inode, log_inode)
         self.assertEqual(offset, 6)
+
+    def test_on_update_with_paranoid(self):
+        updates = [0]
+        def record_update():
+            updates[0] += 1
+        pygtail = Pygtail(self.logfile.name, paranoid=True,
+                          on_update=record_update)
+
+        self.assertEqual(updates[0], 0)
+        next(pygtail)
+        self.assertEqual(updates[0], 1)
+        next(pygtail)
+        self.assertEqual(updates[0], 2)
+        next(pygtail)
+        self.assertEqual(updates[0], 3)
+
+
+    def test_on_update_without_paranoid(self):
+        updates = [0]
+
+        def record_update():
+            updates[0] += 1
+
+        pygtail = Pygtail(self.logfile.name, on_update=record_update)
+
+        self.assertEqual(updates[0], 0)
+        for line in pygtail:
+            self.assertEqual(updates[0], 0)
+        self.assertEqual(updates[0], 1)
+
+    def test_every_n(self):
+        updates = [0]
+        # We save before returning the second line.
+        # We save at the end of the file with all 3 recorded.
+        expected = [1, 3]
+        previous_lines = 0
+
+        def record_update():
+            self.assertEqual(previous_lines, expected[updates[0]])
+            updates[0] += 1
+
+        pygtail = Pygtail(self.logfile.name, every_n=2, on_update=record_update)
+
+        self.assertEqual(updates[0], 0)
+        for line in pygtail:
+            previous_lines += 1
+
 
 def main():
     unittest.main(buffer=True)
