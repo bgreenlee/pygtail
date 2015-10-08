@@ -1,3 +1,10 @@
+pygtail (0.6.0) lucid; urgency=low
+
+  * Added flag to write offset file only after every n lines, and ability to optionally call a
+    function whenever the offset file is written (thanks @btilly)
+
+ -- Brad Greenlee <brad@footle.org>  Thu, 08 October 2015 05:19:19 -0700
+
 pygtail (0.5.3) lucid; urgency=low
 
   * Fixed Python 3 compatibility (thanks @sbraz)
