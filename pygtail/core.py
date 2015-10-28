@@ -23,14 +23,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from __future__ import print_function
-from os import stat
+from stat import S_IFREG
+from os import stat, listdir
 from os.path import exists, getsize
+from os.path import join as path_join
 import sys
 import glob
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 
 PY3 = sys.version_info[0] == 3
@@ -61,7 +63,7 @@ class Pygtail(object):
     copytruncate  Support copytruncate-style log rotation (default: True)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False):
+                 every_n=0, on_update=False, use_update_file=True):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
@@ -73,6 +75,7 @@ class Pygtail(object):
         self._since_update = 0
         self._fh = None
         self._rotated_logfile = None
+        self._use_update_file = use_update_file
 
         # if offset file exists and non-empty, open and parse it
         if exists(self._offset_file) and getsize(self._offset_file):
@@ -181,11 +184,12 @@ class Pygtail(object):
         """
         if self.on_update:
             self.on_update()
-        offset = self._filehandle().tell()
-        inode = stat(self.filename).st_ino
-        fh = open(self._offset_file, "w")
-        fh.write("%s\n%s\n" % (inode, offset))
-        fh.close()
+        if self._use_update_file:
+            offset = self._filehandle().tell()
+            inode = stat(self.filename).st_ino
+            with open(self._offset_file, "w") as fh:
+                fh.write("%s\n%s\n" % (inode, offset))
+
         self._since_update = 0
 
     def _determine_rotated_logfile(self):
@@ -255,6 +259,64 @@ class Pygtail(object):
         self._since_update += 1
         return line
 
+class Pygdir(object):
+    """
+    Create a monitor object for a specified directory. 
+
+    Every time the iterator object is queried, the file set is also updated.
+
+    base_dir        The directory to monitor
+
+    Other parameters are passed as-is into Pygtail.
+    """
+    def __init__(self, base_dir, paranoid=False, copytruncate=True,
+                 every_n=0, on_update=False):
+        self._base_dir = base_dir
+        self._file_set = {}
+        self._paranoid = paranoid
+        self._copytruncate = copytruncate
+        self._every_n = every_n
+        self._on_update = on_update
+
+    def _make_filename(self, filename):
+        return path_join(self._base_dir, filename)
+
+    def _regular_files_in_dir(self):
+        return [f for f in listdir(self._base_dir) if stat(self._make_filename(f)).st_mode & S_IFREG > 0]
+
+    def _update_file_set(self):
+        """
+        Update the file set to be monitored: all new files are added, existing files aren't touched.
+
+        XXX: This could mean that if an I/O error occurs (e.g., a monitored file is deleted, and then re-created) we would stop monitoring that file.
+        """
+        def make_pygtail(filename):
+            return Pygtail(self._make_filename(filename), None, self._paranoid, self._copytruncate, self._every_n, self._on_update, False)
+        self._file_set.update({f:make_pygtail(f) 
+            for f in self._regular_files_in_dir() 
+                if f not in self._file_set.keys()})
+    
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+
+        # XXX: consider moving this to after iteration; starvation could occur either way.
+        # Either super-active old files will choke out new files, or many-created files will choke out old files. Currently, the code errs on side of few creations and many additions
+        self._update_file_set()
+        for p in self._file_set.values():
+            try:
+                return p.__next__()
+            except StopIteration:
+                # eat the exception and continue trying to find
+                # an entry with a next line
+                pass
+
+        # we're out of files, so really no more lines
+        raise StopIteration
+
+    def __iter__(self):
+        return self
 
 def main():
     # command-line parsing
