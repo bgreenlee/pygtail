@@ -184,11 +184,13 @@ class Pygtail(object):
         """
         if self.on_update:
             self.on_update()
+        
         if self._use_update_file:
             offset = self._filehandle().tell()
             inode = stat(self.filename).st_ino
-            with open(self._offset_file, "w") as fh:
-                fh.write("%s\n%s\n" % (inode, offset))
+            fh = open(self._offset_file, "w")
+            fh.write("%s\n%s\n" % (inode, offset))
+            fh.close()
 
         self._since_update = 0
 
