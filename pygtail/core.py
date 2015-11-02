@@ -269,7 +269,7 @@ class Pygdir(object):
 
     Other parameters are passed as-is into Pygtail.
     """
-    def __init__(self, base_dir, paranoid=False, copytruncate=True,
+    def __init__(self, base_dir, filter_func=None, paranoid=False, copytruncate=True,
                  every_n=0, on_update=False):
         self._base_dir = base_dir
         self._file_set = {}
@@ -277,12 +277,13 @@ class Pygdir(object):
         self._copytruncate = copytruncate
         self._every_n = every_n
         self._on_update = on_update
+        self._filter_func = filter_func
 
     def _make_filename(self, filename):
         return path_join(self._base_dir, filename)
 
     def _regular_files_in_dir(self):
-        return [f for f in listdir(self._base_dir) if stat(self._make_filename(f)).st_mode & S_IFREG > 0]
+        return filter(self._filter_func, [f for f in listdir(self._base_dir) if stat(self._make_filename(f)).st_mode & S_IFREG > 0])
 
     def _update_file_set(self):
         """
