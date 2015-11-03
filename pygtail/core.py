@@ -24,13 +24,14 @@
 
 from __future__ import print_function
 from stat import S_IFREG
-from os import stat, listdir
-from os.path import exists, getsize
+from os import stat, listdir, walk
+from os.path import exists, getsize, basename
 from os.path import join as path_join
 import sys
 import glob
 import gzip
 from optparse import OptionParser
+
 
 __version__ = '0.6.1'
 
@@ -273,9 +274,10 @@ class Pygdir(object):
 
     Other parameters are passed as-is into Pygtail.
     """
-    def __init__(self, base_dir, filter_func=None, paranoid=False, copytruncate=True,
+    def __init__(self, base_dir, filter_func=None, base_dir_glob=None, paranoid=False, copytruncate=True,
                  every_n=0, on_update=False):
         self._base_dir = base_dir
+        self._base_dir_glob = base_dir_glob
         self._file_set = {}
         self._paranoid = paranoid
         self._copytruncate = copytruncate
@@ -286,8 +288,14 @@ class Pygdir(object):
     def _make_filename(self, filename):
         return path_join(self._base_dir, filename)
 
+    def _get_all_base_dir_files(self):
+        if self._base_dir_glob is not None:
+            return [y for x in walk(self._base_dir) for y in glob.glob(path_join(x[0], base_dir_glob))]
+        else:
+            return listdir(self._base_dir)
+
     def _regular_files_in_dir(self):
-        return filter(self._filter_func, [f for f in listdir(self._base_dir) if stat(self._make_filename(f)).st_mode & S_IFREG > 0])
+        return filter(self._filter_func, [f for f in self._get_all_base_dir_files() if stat(self._make_filename(f)).st_mode & S_IFREG > 0])
 
     def _update_file_set(self):
         """
