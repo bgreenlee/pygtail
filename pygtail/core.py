@@ -255,6 +255,8 @@ class Pygtail(object):
         return None
 
     def _get_next_line(self):
+        # flush handle before reading; this helps emulate `tail -f` behavior.
+        self._filehandle().flush()
         line = self._filehandle().readline()
         if not line:
             raise StopIteration
