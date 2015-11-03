@@ -290,7 +290,7 @@ class Pygdir(object):
 
     def _get_all_base_dir_files(self):
         if self._base_dir_glob is not None:
-            return [y for x in walk(self._base_dir) for y in glob.glob(path_join(x[0], base_dir_glob))]
+            return [y for x in walk(self._base_dir) for y in glob.glob(path_join(x[0], self._base_dir_glob))]
         else:
             return listdir(self._base_dir)
 
