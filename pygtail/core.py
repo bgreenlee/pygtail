@@ -306,7 +306,7 @@ class Pygdir(object):
         def make_pygtail(filename):
             return Pygtail(self._make_filename(filename), None, self._paranoid, self._copytruncate, self._every_n, self._on_update, False)
         self._file_set.update({f:make_pygtail(f) 
-            for f in self._regular_files_in_dir() 
+            for f in self._regular_files_in_dir(): 
                 if f not in self._file_set.keys()})
     
     def __next__(self):
