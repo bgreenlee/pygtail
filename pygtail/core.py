@@ -257,8 +257,12 @@ class Pygtail(object):
 
     def _get_next_line(self):
         # flush handle before reading; this helps emulate `tail -f` behavior.
-        self._filehandle().flush()
-        line = self._filehandle().readline()
+        try:
+            self._filehandle().flush()
+            line = self._filehandle().readline()
+        except IOError:
+            # In case the referred path no longer exists
+            raise StopIteration
         if not line:
             raise StopIteration
         self._since_update += 1
