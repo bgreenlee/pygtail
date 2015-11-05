@@ -168,9 +168,9 @@ class Pygtail(object):
         if not self._fh or self._is_closed():
             filename = self._rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self._fh = gzip.open(filename, 'r')
+                self._fh = gzip.open(filename, "r", 1)
             else:
-                self._fh = open(filename, "r")
+                self._fh = open(filename, "r", 1)
             self._fh.seek(self._offset)
 
         return self._fh
