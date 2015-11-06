@@ -1,3 +1,9 @@
+pygtail (0.6.1) lucid; urgency=low
+
+  * Enable line buffering to avoid reading incomplete lines (thanks @olystretch)
+
+ -- Brad Greenlee <brad@footle.org>  Thu, 05 November 2015 20:13:52 -0800
+
 pygtail (0.6.0) lucid; urgency=low
 
   * Added flag to write offset file only after every n lines, and ability to optionally call a
