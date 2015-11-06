@@ -170,7 +170,7 @@ class Pygtail(object):
             if filename.endswith('.gz'):
                 self._fh = gzip.open(filename, 'r')
             else:
-                self._fh = open(filename, "r")
+                self._fh = open(filename, "r", 1)
             self._fh.seek(self._offset)
 
         return self._fh
