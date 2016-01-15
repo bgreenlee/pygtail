@@ -37,7 +37,13 @@ from pygtail import Pygtail
 for line in Pygtail("some.log"):
     sys.stdout.write(line)
 ```
+If you want to enable file rotation 
+```python
+from pygtail import Pygtail
 
+for line in Pygtail("some.log", on_update=True):
+    sys.stdout.write(line)
+```
 
 Build status
 ------------
