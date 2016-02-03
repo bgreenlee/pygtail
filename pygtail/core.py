@@ -299,7 +299,7 @@ class Pygdir(object):
             return listdir(self._base_dir)
 
     def _regular_files_in_dir(self):
-        return filter(self._filter_func, [f for f in self._get_all_base_dir_files() if stat(self._make_filename(f)).st_mode & S_IFREG > 0])
+        return filter(self._filter_func, [f for f in self._get_all_base_dir_files() if exists(f) and stat(self._make_filename(f)).st_mode & S_IFREG > 0])
 
     def _update_file_set(self):
         """
