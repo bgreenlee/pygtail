@@ -94,6 +94,26 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
+    def test_logrotate_with_dateext(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+        os.rename(self.logfile.name, "%s-20160616" % self.logfile.name)
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_logrotate_with_dateext2(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+        os.rename(self.logfile.name, "%s-20160616-1466093571" % self.logfile.name)
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
     def test_copytruncate_off_smaller(self):
         self.test_readlines()
         self.copytruncate()
