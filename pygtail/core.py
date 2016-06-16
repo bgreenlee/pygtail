@@ -233,11 +233,13 @@ class Pygtail(object):
         if exists(candidate):
             return candidate
 
+        # dateext rotation scheme - `dateformat -%Y%m%d`
         candidates = glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename)
         if candidates:
             candidates.sort()
             return candidates[-1]  # return most recent
 
+        # dateext rotation scheme - `dateformat -%Y%m%d-%s`
         candidates = glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename)
         if candidates:
             candidates.sort()
