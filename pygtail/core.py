@@ -30,7 +30,7 @@ import glob
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 
 
 PY3 = sys.version_info[0] == 3

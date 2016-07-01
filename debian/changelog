@@ -1,3 +1,10 @@
+pygtail (0.7.0) lucid; urgency=low
+
+  * Add handling for logrotate dateext dateformat -%Y%m%d-%s log files, with and without
+    delaycompress (thanks @akashawasthi)
+
+ -- Brad Greenlee <brad@footle.org>  Thu, 30 June 2016 20:25:05 -0700
+
 pygtail (0.6.1) lucid; urgency=low
 
   * Enable line buffering to avoid reading incomplete lines (thanks @olystretch)
