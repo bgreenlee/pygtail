@@ -233,23 +233,23 @@ class Pygtail(object):
         if exists(candidate):
             return candidate
 
-        # dateext rotation scheme - `dateformat -%Y%m%d`
-        candidates = glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename)
-        if candidates:
-            candidates.sort()
-            return candidates[-1]  # return most recent
-
-        # dateext rotation scheme - `dateformat -%Y%m%d-%s`
-        candidates = glob.glob("%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" % self.filename)
-        if candidates:
-            candidates.sort()
-            return candidates[-1]  # return most recent
-
-        # for TimedRotatingFileHandler
-        candidates = glob.glob("%s.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]" % self.filename)
-        if candidates:
-            candidates.sort()
-            return candidates[-1]  # return most recent
+        rotated_filename_patterns = (
+            # logrotate dateext rotation scheme - `dateformat -%Y%m%d` + with `delaycompress`
+            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
+            # logrotate dateext rotation scheme - `dateformat -%Y%m%d` + without `delaycompress`
+            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
+            # logrotate dateext rotation scheme - `dateformat -%Y%m%d-%s` + with `delaycompress`
+            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
+            # logrotate dateext rotation scheme - `dateformat -%Y%m%d-%s` + without `delaycompress`
+            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
+            # for TimedRotatingFileHandler
+            ".[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]",
+        )
+        for rotated_filename_pattern in rotated_filename_patterns:
+            candidates = glob.glob(self.filename + rotated_filename_pattern)
+            if candidates:
+                candidates.sort()
+                return candidates[-1]  # return most recent
 
         # no match
         return None

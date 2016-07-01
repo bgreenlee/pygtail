@@ -94,7 +94,7 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
-    def test_logrotate_with_dateext(self):
+    def test_logrotate_with_dateext_with_delaycompress(self):
         new_lines = ["4\n5\n", "6\n7\n"]
         pygtail = Pygtail(self.logfile.name)
         pygtail.read()
@@ -104,12 +104,62 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
-    def test_logrotate_with_dateext2(self):
+    def test_logrotate_with_dateext_without_delaycompress(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+
+        # put content to gzip file
+        gzip_handle = gzip.open("%s-20160616.gz" % self.logfile.name, 'wb')
+        with open(self.logfile.name, 'rb') as logfile:
+            gzip_handle.write(logfile.read())
+        gzip_handle.close()
+
+        with open(self.logfile.name, 'w'):
+            # truncate file
+            pass
+
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_logrotate_with_dateext2_with_delaycompress(self):
         new_lines = ["4\n5\n", "6\n7\n"]
         pygtail = Pygtail(self.logfile.name)
         pygtail.read()
         self.append(new_lines[0])
         os.rename(self.logfile.name, "%s-20160616-1466093571" % self.logfile.name)
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_logrotate_with_dateext2_without_delaycompress(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+
+        # put content to gzip file
+        gzip_handle = gzip.open("%s-20160616-1466093571.gz" % self.logfile.name, 'wb')
+        with open(self.logfile.name, 'rb') as logfile:
+            gzip_handle.write(logfile.read())
+        gzip_handle.close()
+
+        with open(self.logfile.name, 'w'):
+            # truncate file
+            pass
+
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_timed_rotating_file_handler(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+        os.rename(self.logfile.name, "%s.2016-06-16" % self.logfile.name)
         self.append(new_lines[1])
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
