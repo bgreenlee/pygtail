@@ -59,14 +59,16 @@ class Pygtail(object):
                   we reach the end of the file (default: 0))
     on_update     Execute this function when offset data is written (default False)
     copytruncate  Support copytruncate-style log rotation (default: True)
+    encoding      Encoding to use for reading files (default: system encoding)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False):
+                 every_n=0, on_update=False, encoding=None):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
         self.on_update = on_update
         self.copytruncate = copytruncate
+        self.encoding = encoding
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -168,9 +170,9 @@ class Pygtail(object):
         if not self._fh or self._is_closed():
             filename = self._rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self._fh = gzip.open(filename, 'r')
+                self._fh = gzip.open(filename, 'r', encoding=self.encoding)
             else:
-                self._fh = open(filename, "r", 1)
+                self._fh = open(filename, "r", 1, encoding=self.encoding)
             self._fh.seek(self._offset)
 
         return self._fh
@@ -277,6 +279,8 @@ def main():
     cmdline.add_option("--no-copytruncate", action="store_true",
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
              " shrinks, print a warning.")
+    cmdline.add_option("--encoding", action="store",
+        help="Encoding to use for reading files (default: system encoding)")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -295,7 +299,8 @@ def main():
                       offset_file=options.offset_file,
                       paranoid=options.paranoid,
                       every_n=options.every_n,
-                      copytruncate=not options.no_copytruncate)
+                      copytruncate=not options.no_copytruncate,
+                      encoding=options.encoding)
 
     for line in pygtail:
         sys.stdout.write(line)

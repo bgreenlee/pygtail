@@ -30,6 +30,8 @@ From the command line:
                             the file).
       --no-copytruncate     Don't support copytruncate-style log rotation.
                             Instead, if the log file shrinks, print a warning.
+      --encoding ENCODING   Encoding to use for reading files (default: system
+                            encoding)
 
 In your code:
 
