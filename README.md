@@ -36,6 +36,11 @@ from pygtail import Pygtail
 
 for line in Pygtail("some.log"):
     sys.stdout.write(line)
+    
+# to enable file rotation set on_update=True
+for line in Pygtail("some.log", on_update=True):
+...
+
 ```
 
 
