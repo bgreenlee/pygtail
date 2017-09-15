@@ -23,7 +23,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from __future__ import print_function
-from os import stat
+from os import fstat, stat
 from os.path import exists, getsize
 import sys
 import glob
@@ -102,9 +102,9 @@ class Pygtail(object):
             line = self._get_next_line()
         except StopIteration:
             # we've reached the end of the file; if we're processing the
-            # rotated log file, we can continue with the actual file; otherwise
+            # rotated log file or the file has been renamed, we can continue with the actual file; otherwise
             # update the offset file
-            if self._rotated_logfile:
+            if self._is_new_file():
                 self._rotated_logfile = None
                 self._fh.close()
                 self._offset = 0
@@ -253,6 +253,12 @@ class Pygtail(object):
 
         # no match
         return None
+
+    def _is_new_file(self):
+        # Processing rotated logfile or at the end of current file which has been renamed
+        return self._rotated_logfile or \
+               self._filehandle().tell() == fstat(self._filehandle().fileno()).st_size and \
+               fstat(self._filehandle().fileno()).st_ino != stat(self.filename).st_ino
 
     def _get_next_line(self):
         line = self._filehandle().readline()
