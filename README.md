@@ -38,6 +38,10 @@ for line in Pygtail("some.log"):
     sys.stdout.write(line)
 ```
 
+Contributing
+------------
+
+Pull requests are very much welcome, but I will not merge your changes if you don't include a test. Run tests with `python setup.py test`.
 
 Build status
 ------------
