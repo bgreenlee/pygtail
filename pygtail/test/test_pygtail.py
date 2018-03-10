@@ -271,6 +271,21 @@ class PygtailTest(unittest.TestCase):
         for line in pygtail:
             previous_lines += 1
 
+    def test_renamecreate(self):
+        """
+        Tests "renamecreate" semantics where the currently processed file gets renamed and the
+        original file gets recreated. This is the behavior of certain logfile rollers such as
+        TimeBasedRollingPolicy in Java's Logback library.
+        """
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        os.rename(self.logfile.name, "%s.2018-03-10" % self.logfile.name)
+        # append will recreate the original log file
+        self.append(new_lines[0])
+        self.append(new_lines[1])
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
 
 def main():
     unittest.main(buffer=True)
