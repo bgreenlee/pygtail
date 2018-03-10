@@ -64,6 +64,14 @@ class PygtailTest(unittest.TestCase):
         new_pygtail = Pygtail(self.logfile.name)
         self.assertEqual(new_pygtail.read(), new_lines)
 
+    def test_read_from_the_file_end(self):
+        pygtail = Pygtail(self.logfile.name, read_from_end=True)
+        self.assertEqual(pygtail.read(), None)
+        new_lines = "4\n5\n"
+        self.append(new_lines)
+        new_pygtail = Pygtail(self.logfile.name, read_from_end=True)
+        self.assertEqual(new_pygtail.read(), new_lines)
+
     def test_logrotate_without_delay_compress(self):
         new_lines = ["4\n5\n", "6\n7\n"]
         pygtail = Pygtail(self.logfile.name)

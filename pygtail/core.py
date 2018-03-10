@@ -61,12 +61,13 @@ class Pygtail(object):
     copytruncate  Support copytruncate-style log rotation (default: True)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False):
+                 every_n=0, on_update=False, read_from_end=False ):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
         self.on_update = on_update
         self.copytruncate = copytruncate
+        self.read_from_end = read_from_end
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -171,7 +172,10 @@ class Pygtail(object):
                 self._fh = gzip.open(filename, 'r')
             else:
                 self._fh = open(filename, "r", 1)
-            self._fh.seek(self._offset)
+            if self.read_from_end and not exists(self._offset_file):
+                self._fh.seek(0, 2)
+            else:
+                self._fh.seek(self._offset)
 
         return self._fh
 
@@ -283,6 +287,8 @@ def main():
     cmdline.add_option("--no-copytruncate", action="store_true",
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
              " shrinks, print a warning.")
+    cmdline.add_option("--read-from-end", action="store_true",
+        help="Read log file from the end if offset file is missing. Might be useful for large log files")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -301,7 +307,8 @@ def main():
                       offset_file=options.offset_file,
                       paranoid=options.paranoid,
                       every_n=options.every_n,
-                      copytruncate=not options.no_copytruncate)
+                      copytruncate=not options.no_copytruncate,
+                      read_from_end=options.read_from_end)
 
     for line in pygtail:
         sys.stdout.write(line)
