@@ -1,3 +1,11 @@
+pygtail (0.8.0) lucid; urgency=low
+
+  * Add handling for "renamecreate" semantics where the currently processed file gets renamed and the
+        original file gets recreated. This is the behavior of certain logfile rollers such as
+        TimeBasedRollingPolicy in Java's Logback library. (thanks @bobtiernay-okta)
+
+ -- Brad Greenlee <brad@footle.org>  Sat, 10 March 2018 08:39:18 -0800
+
 pygtail (0.7.0) lucid; urgency=low
 
   * Add handling for logrotate dateext dateformat -%Y%m%d-%s log files, with and without
