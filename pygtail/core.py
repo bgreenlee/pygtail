@@ -24,6 +24,7 @@
 
 from __future__ import print_function
 from os import fstat, stat
+import os
 from os.path import exists, getsize
 import sys
 import glob
@@ -173,7 +174,7 @@ class Pygtail(object):
             else:
                 self._fh = open(filename, "r", 1)
             if self.read_from_end and not exists(self._offset_file):
-                self._fh.seek(0, 2)
+                self._fh.seek(0, os.SEEK_END)
             else:
                 self._fh.seek(self._offset)
 
