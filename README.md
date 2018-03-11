@@ -28,6 +28,9 @@ From the command line:
                             the file).
       --no-copytruncate     Don't support copytruncate-style log rotation.
                             Instead, if the log file shrinks, print a warning.
+      --read-from-end       Read log file from the end if offset file is
+                            missing. Useful for large files.
+      --version             Print version and exit.
 
 In your code:
 

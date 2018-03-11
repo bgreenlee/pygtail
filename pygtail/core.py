@@ -289,7 +289,7 @@ def main():
         help="Don't support copytruncate-style log rotation. Instead, if the log file"
              " shrinks, print a warning.")
     cmdline.add_option("--read-from-end", action="store_true",
-        help="Read log file from the end if offset file is missing. Might be useful for large log files")
+        help="Read log file from the end if offset file is missing. Useful for large files.")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
