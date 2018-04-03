@@ -309,6 +309,23 @@ class PygtailTest(unittest.TestCase):
         self.append(new_lines[1])
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
+    def test_renamecreate_unknown_rotated_name(self):
+        """
+        Tests "renamecreate" semantics where the currently processed file gets renamed and the
+        original file gets recreated. Rolled file has unknown name to pygtail. logrotate from
+        Linux has this behaviour when rotating into separate directory.
+        """
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        os.rename(self.logfile.name, "%s.unknown-name" % self.logfile.name)
+        # append will recreate the original log file
+        self.append(new_lines[0])
+        self.append(new_lines[1])
+        # reopen using Pytgail
+        pygtail = Pygtail(self.logfile.name)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
     def test_full_lines(self):
         """
         Tests lines are logged only when they have a new line at the end. This is useful to ensure that log lines
