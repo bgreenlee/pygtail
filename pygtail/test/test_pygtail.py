@@ -172,6 +172,17 @@ class PygtailTest(unittest.TestCase):
         pygtail = Pygtail(self.logfile.name)
         self.assertEqual(pygtail.read(), ''.join(new_lines))
 
+    def test_custom_rotating_file_handler_with_prepend(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name)
+        pygtail.read()
+        self.append(new_lines[0])
+        file_dir, rel_filename = os.path.split(self.logfile.name)
+        os.rename(self.logfile.name, os.path.join(file_dir, "custom_log_pattern.%s" % rel_filename))
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name, rotated_filename_patterns=["custom_log_pattern.%s"])
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
     def test_copytruncate_off_smaller(self):
         self.test_readlines()
         self.copytruncate()
