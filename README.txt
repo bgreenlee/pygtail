@@ -32,6 +32,9 @@ From the command line:
                             Instead, if the log file shrinks, print a warning.
       --read-from-end       Read log file from the end if offset file is
                             missing. Useful for large files.
+      --log-pattern         Custom log rotation glob pattern. Use %s to
+                            represent the original filename. You may use this
+                            multiple times to provide multiple patterns.
       --version             Print version and exit.
 
 In your code:

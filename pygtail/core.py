@@ -60,17 +60,17 @@ class Pygtail(object):
                   we reach the end of the file (default: 0))
     on_update     Execute this function when offset data is written (default False)
     copytruncate  Support copytruncate-style log rotation (default: True)
-    rotated_filename_patterns  List of custom rotated log patterns to match (default: None)
+    log_patterns  List of custom rotated log patterns to match (default: None)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False, read_from_end=False, rotated_filename_patterns=None):
+                 every_n=0, on_update=False, read_from_end=False, log_patterns=None):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
         self.on_update = on_update
         self.copytruncate = copytruncate
         self.read_from_end = read_from_end
-        self.rotated_filename_patterns = rotated_filename_patterns
+        self.log_patterns = log_patterns
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -252,8 +252,8 @@ class Pygtail(object):
             # for TimedRotatingFileHandler
             "%s.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]",
         ]
-        if self.rotated_filename_patterns:
-            rotated_filename_patterns.extend(self.rotated_filename_patterns)
+        if self.log_patterns:
+            rotated_filename_patterns.extend(self.log_patterns)
 
         # break into directory and filename components to support cases where the
         # the file is prepended as part of rotation
@@ -298,8 +298,9 @@ def main():
              " shrinks, print a warning.")
     cmdline.add_option("--read-from-end", action="store_true",
         help="Read log file from the end if offset file is missing. Useful for large files.")
-    cmdline.add_option("--log-patterns", action="append",
-        help="Custom log rotation glob patterns. Use %s to represent the original filename")
+    cmdline.add_option("--log-pattern", action="append",
+        help="Custom log rotation glob pattern. Use %s to represent the original filename."
+             " You may use this multiple times to provide multiple patterns.")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -320,7 +321,7 @@ def main():
                       every_n=options.every_n,
                       copytruncate=not options.no_copytruncate,
                       read_from_end=options.read_from_end,
-                      rotated_filename_patterns=options.rotated_filename_patterns)
+                      rotated_filename_patterns=options.log_pattern)
 
     for line in pygtail:
         sys.stdout.write(line)
