@@ -31,7 +31,7 @@ import glob
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.9.0'
+__version__ = '0.10.0'
 
 
 PY3 = sys.version_info[0] == 3
@@ -60,15 +60,17 @@ class Pygtail(object):
                   we reach the end of the file (default: 0))
     on_update     Execute this function when offset data is written (default False)
     copytruncate  Support copytruncate-style log rotation (default: True)
+    rotated_filename_patterns  List of custom rotated log patterns to match (default: None)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False, read_from_end=False ):
+                 every_n=0, on_update=False, read_from_end=False, rotated_filename_patterns=None):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
         self.on_update = on_update
         self.copytruncate = copytruncate
         self.read_from_end = read_from_end
+        self.rotated_filename_patterns = rotated_filename_patterns
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -238,20 +240,26 @@ class Pygtail(object):
         if exists(candidate):
             return candidate
 
-        rotated_filename_patterns = (
+        rotated_filename_patterns = [
             # logrotate dateext rotation scheme - `dateformat -%Y%m%d` + with `delaycompress`
-            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
+            "%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
             # logrotate dateext rotation scheme - `dateformat -%Y%m%d` + without `delaycompress`
-            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
+            "%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
             # logrotate dateext rotation scheme - `dateformat -%Y%m%d-%s` + with `delaycompress`
-            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
+            "%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]",
             # logrotate dateext rotation scheme - `dateformat -%Y%m%d-%s` + without `delaycompress`
-            "-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
+            "%s-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].gz",
             # for TimedRotatingFileHandler
-            ".[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]",
-        )
+            "%s.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]",
+        ]
+        if self.rotated_filename_patterns:
+            rotated_filename_patterns.extend(self.rotated_filename_patterns)
+
+        # break into directory and filename components to support cases where the
+        # the file is prepended as part of rotation
+        file_dir, rel_filename = os.path.split(self.filename)
         for rotated_filename_pattern in rotated_filename_patterns:
-            candidates = glob.glob(self.filename + rotated_filename_pattern)
+            candidates = glob.glob(os.path.join(file_dir, rotated_filename_pattern % rel_filename))
             if candidates:
                 candidates.sort()
                 return candidates[-1]  # return most recent
@@ -290,6 +298,8 @@ def main():
              " shrinks, print a warning.")
     cmdline.add_option("--read-from-end", action="store_true",
         help="Read log file from the end if offset file is missing. Useful for large files.")
+    cmdline.add_option("--log-patterns", action="append",
+        help="Custom log rotation glob patterns. Use %s to represent the original filename")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -309,7 +319,8 @@ def main():
                       paranoid=options.paranoid,
                       every_n=options.every_n,
                       copytruncate=not options.no_copytruncate,
-                      read_from_end=options.read_from_end)
+                      read_from_end=options.read_from_end,
+                      rotated_filename_patterns=options.rotated_filename_patterns)
 
     for line in pygtail:
         sys.stdout.write(line)
