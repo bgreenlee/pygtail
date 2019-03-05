@@ -31,7 +31,7 @@ import glob
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.10.0'
+__version__ = '0.10.1'
 
 
 PY3 = sys.version_info[0] == 3
@@ -321,7 +321,7 @@ def main():
                       every_n=options.every_n,
                       copytruncate=not options.no_copytruncate,
                       read_from_end=options.read_from_end,
-                      rotated_filename_patterns=options.log_pattern)
+                      log_patterns=options.log_pattern)
 
     for line in pygtail:
         sys.stdout.write(line)

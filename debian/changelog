@@ -1,3 +1,9 @@
+pygtail (0.10.1) lucid; urgency=low
+
+  * Fix keyword argument mismatch (thanks @ushuz!)
+
+ -- Brad Greenlee <brad@footle.org> Mon, 04 March 2019 22:18:00 -0800
+
 pygtail (0.10.0) lucid; urgency=low
 
   * Add --log-pattern flag to allow for custom rotated log filename patterns. (thanks @silenben)
