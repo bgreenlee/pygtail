@@ -35,6 +35,8 @@ From the command line:
                             multiple times to provide multiple patterns.
       --full_lines          Only log when line ends in a newline `\n`
                             (default: False)
+      --encoding ENCODING   Encoding to use for reading files (default: system
+                            encoding)
       --version             Print version and exit.
 
 In your code:
