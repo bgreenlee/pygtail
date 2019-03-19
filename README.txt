@@ -35,6 +35,8 @@ From the command line:
       --log-pattern         Custom log rotation glob pattern. Use %s to
                             represent the original filename. You may use this
                             multiple times to provide multiple patterns.
+      --encoding ENCODING   Encoding to use for reading files (default: system
+                            encoding)
       --version             Print version and exit.
 
 In your code:
