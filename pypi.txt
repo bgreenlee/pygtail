@@ -2,5 +2,6 @@ To update the version on PyPi:
 
 1. Update __version__ in pygtail/core.py
 2. Update debian/changelog
-3. python3 setup.py sdist bdist_wheel
-4. twine upload dist/*
+3. rm dist/*
+4. python3 setup.py sdist bdist_wheel
+5. twine upload dist/*
