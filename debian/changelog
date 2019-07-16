@@ -1,3 +1,9 @@
+pygtail (0.11.0) lucid; urgency=low
+
+  * Add option to only log lines ending in a newline (thanks @MDunitz!)
+
+ -- Brad Greenlee <brad@footle.org> Tue, 16 July 2019 05:12:00 -0700
+
 pygtail (0.10.1) lucid; urgency=low
 
   * Fix keyword argument mismatch (thanks @ushuz!)
