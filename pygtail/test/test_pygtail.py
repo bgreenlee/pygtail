@@ -1,5 +1,6 @@
 import os
 import sys
+
 try:
     # python 2.6
     import unittest2 as unittest
@@ -246,8 +247,10 @@ class PygtailTest(unittest.TestCase):
 
     def test_on_update_with_paranoid(self):
         updates = [0]
+
         def record_update():
             updates[0] += 1
+
         pygtail = Pygtail(self.logfile.name, paranoid=True,
                           on_update=record_update)
 
@@ -258,7 +261,6 @@ class PygtailTest(unittest.TestCase):
         self.assertEqual(updates[0], 2)
         next(pygtail)
         self.assertEqual(updates[0], 3)
-
 
     def test_on_update_without_paranoid(self):
         updates = [0]
@@ -304,6 +306,20 @@ class PygtailTest(unittest.TestCase):
         self.append(new_lines[0])
         self.append(new_lines[1])
         self.assertEqual(pygtail.read(), ''.join(new_lines))
+
+    def test_full_lines(self):
+        """
+        Tests lines are logged only when they have a new line at the end. This is useful to ensure that log lines
+        aren't unintentionally split up.
+        """
+        pygtail = Pygtail(self.logfile.name, full_lines=True)
+        new_lines = "4\n5,"
+        last_line = "5.5\n6\n"
+
+        self.append(new_lines)
+        pygtail.read()
+        self.append(last_line)
+        self.assertEqual(pygtail.read(), "5,5.5\n6\n")
 
 
 def main():

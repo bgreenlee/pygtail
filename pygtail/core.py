@@ -61,9 +61,10 @@ class Pygtail(object):
     on_update     Execute this function when offset data is written (default False)
     copytruncate  Support copytruncate-style log rotation (default: True)
     log_patterns  List of custom rotated log patterns to match (default: None)
+    full_lines    Only log when line ends in a newline `\n` (default: False)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False, read_from_end=False, log_patterns=None):
+                 every_n=0, on_update=False, read_from_end=False, log_patterns=None, full_lines=False):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
@@ -71,6 +72,7 @@ class Pygtail(object):
         self.copytruncate = copytruncate
         self.read_from_end = read_from_end
         self.log_patterns = log_patterns
+        self._full_lines = full_lines
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -274,7 +276,12 @@ class Pygtail(object):
                fstat(self._filehandle().fileno()).st_ino != stat(self.filename).st_ino
 
     def _get_next_line(self):
+        curr_offset = self._filehandle().tell()
         line = self._filehandle().readline()
+        if self._full_lines:
+            if not line.endswith('\n'):
+                self._filehandle().seek(curr_offset)
+                raise StopIteration
         if not line:
             raise StopIteration
         self._since_update += 1
@@ -301,6 +308,8 @@ def main():
     cmdline.add_option("--log-pattern", action="append",
         help="Custom log rotation glob pattern. Use %s to represent the original filename."
              " You may use this multiple times to provide multiple patterns.")
+    cmdline.add_option("--full_lines", action="store_true",
+                       help="Only log when line ends in a newline (\\n)")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
 
@@ -321,7 +330,9 @@ def main():
                       every_n=options.every_n,
                       copytruncate=not options.no_copytruncate,
                       read_from_end=options.read_from_end,
-                      log_patterns=options.log_pattern)
+                      log_patterns=options.log_pattern,
+                      full_lines=options.full_lines
+                      )
 
     for line in pygtail:
         sys.stdout.write(line)
