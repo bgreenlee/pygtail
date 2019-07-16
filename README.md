@@ -33,6 +33,8 @@ From the command line:
       --log-pattern         Custom log rotation glob pattern. Use %s to
                             represent the original filename. You may use this
                             multiple times to provide multiple patterns.
+      --full_lines          Only log when line ends in a newline `\n`
+                            (default: False)
       --version             Print version and exit.
 
 In your code:
