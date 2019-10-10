@@ -1,4 +1,31 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/pkg-info.mk
+
+PYTHON2_VERSIONS = $(shell pyversions -r)
+PYTHON3_VERSIONS = $(shell py3versions -r)
+
 %:
-    dh $@
+	dh "$@" --with python2,python3
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build
+
+override_dh_auto_build:
+	dh_auto_build
+	set -ex; for python in $(PYTHON3_VERSIONS); do \
+			$$python setup.py build; \
+	done
+
+override_dh_auto_install:
+	dh_auto_install
+	set -ex; for python in $(PYTHON3_VERSIONS); do \
+            $$python setup.py install --root=$(CURDIR)/debian/$(DEB_SOURCE) --install-layout=deb; \
+	done
+
+override_dh_auto_test:
+	dh_auto_test
+	set -ex; cd pygtail && for python in $(PYTHON3_VERSIONS) $(PYTHON2_VERSIONS); do \
+			$$python test/test_pygtail.py; \
+	done

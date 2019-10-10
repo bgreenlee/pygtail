@@ -2,12 +2,26 @@ Source: pygtail
 Section: python
 Priority: optional
 Maintainer: Brad Greenlee <brad@footle.org>
-Build-Depends: debhelper (>= 7)
-Build-Depends-Indep: python-support, python-setuptools
+Build-Depends: debhelper (>= 10)
+Build-Depends-Indep: dh-python, python-all, python-setuptools,
+ python3-all, python3-setuptools
 Standards-Version: 3.8.3
 Homepage: http://github.com/bgreenlee/pygtail
 
-Package: pygtail
+Package: python-pygtail
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
-Description: Reads log file lines that have not been read.
+Depends: ${python:Depends}, ${misc:Depends}
+Description: Reads log file lines that have not been read. (Python 2)
+ Pygtail reads log file lines that have not been read. It will even
+ handle log files that have been rotated.
+ .
+ This package installs the program for Python 2.
+
+Package: python3-pygtail
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: Reads log file lines that have not been read. (Python 3)
+ Pygtail reads log file lines that have not been read. It will even
+ handle log files that have been rotated.
+ .
+ This package installs the program for Python 3.

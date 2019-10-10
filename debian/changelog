@@ -2,77 +2,77 @@ pygtail (0.11.0) lucid; urgency=low
 
   * Add option to only log lines ending in a newline (thanks @MDunitz!)
 
- -- Brad Greenlee <brad@footle.org> Tue, 16 July 2019 05:12:00 -0700
+ -- Brad Greenlee <brad@footle.org>  Tue, 16 Jul 2019 05:12:00 -0700
 
 pygtail (0.10.1) lucid; urgency=low
 
   * Fix keyword argument mismatch (thanks @ushuz!)
 
- -- Brad Greenlee <brad@footle.org> Mon, 04 March 2019 22:18:00 -0800
+ -- Brad Greenlee <brad@footle.org>  Mon, 04 Mar 2019 22:18:00 -0800
 
 pygtail (0.10.0) lucid; urgency=low
 
   * Add --log-pattern flag to allow for custom rotated log filename patterns. (thanks @silenben)
 
- -- Brad Greenlee <brad@footle.org> Tue, 20 November 2018 04:48:00 -0800
+ -- Brad Greenlee <brad@footle.org> Tue, 20 Nov 2018 04:48:00 -0800
 
 pygtail (0.9.0) lucid; urgency=low
 
   * Add --read-from-end flag to read the log file from the end if the offset file is missing. (thanks Dmitry Sytsko)
 
- -- Brad Greenlee <brad@footle.org> Thu, 02 August 2018 16:52:00 -0700
+ -- Brad Greenlee <brad@footle.org> Thu, 02 Aug 2018 16:52:00 -0700
 
 pygtail (0.8.0) lucid; urgency=low
 
   * Add handling for "renamecreate" semantics where the currently processed file gets renamed and the
-        original file gets recreated. This is the behavior of certain logfile rollers such as
-        TimeBasedRollingPolicy in Java's Logback library. (thanks @bobtiernay-okta)
+    original file gets recreated. This is the behavior of certain logfile rollers such as
+    TimeBasedRollingPolicy in Java's Logback library. (thanks @bobtiernay-okta)
 
- -- Brad Greenlee <brad@footle.org>  Sat, 10 March 2018 08:39:18 -0800
+ -- Brad Greenlee <brad@footle.org>  Sat, 10 Mar 2018 08:39:18 -0800
 
 pygtail (0.7.0) lucid; urgency=low
 
   * Add handling for logrotate dateext dateformat -%Y%m%d-%s log files, with and without
     delaycompress (thanks @akashawasthi)
 
- -- Brad Greenlee <brad@footle.org>  Thu, 30 June 2016 20:25:05 -0700
+ -- Brad Greenlee <brad@footle.org>  Thu, 30 Jun 2016 20:25:05 -0700
 
 pygtail (0.6.1) lucid; urgency=low
 
   * Enable line buffering to avoid reading incomplete lines (thanks @olystretch)
 
- -- Brad Greenlee <brad@footle.org>  Thu, 05 November 2015 20:13:52 -0800
+ -- Brad Greenlee <brad@footle.org>  Thu, 05 Nov 2015 20:13:52 -0800
 
 pygtail (0.6.0) lucid; urgency=low
 
   * Added flag to write offset file only after every n lines, and ability to optionally call a
     function whenever the offset file is written (thanks @btilly)
 
- -- Brad Greenlee <brad@footle.org>  Thu, 08 October 2015 05:19:19 -0700
+ -- Brad Greenlee <brad@footle.org>  Thu, 08 Oct 2015 05:19:19 -0700
 
 pygtail (0.5.3) lucid; urgency=low
 
   * Fixed Python 3 compatibility (thanks @sbraz)
 
- -- Brad Greenlee <brad@footle.org>  Thu, 16 April 2015 17:30:43 -0700
+ -- Brad Greenlee <brad@footle.org>  Thu, 16 Apr 2015 17:30:43 -0700
 
 pygtail (0.5.2) lucid; urgency=medium
 
   * Fixed issue with potentially incorrect offset due to python's read-ahead buffer (thanks @czchen)
 
- -- Brad Greenlee <brad@footle.org>  Thu, 26 March 2015 09:10:36 -0400
+ -- Brad Greenlee <brad@footle.org>  Thu, 26 Mar 2015 09:10:36 -0400
 
 pygtail (0.5.1) lucid; urgency=low
 
   * Fixed print statement to be Python 3 compatible (thanks @benburry)
 
- -- Brad Greenlee <brad@footle.org>  Fri, 4 January 2015 20:36:00 -0800
+ -- Brad Greenlee <brad@footle.org>  Fri, 4 Jan 2015 20:36:00 -0800
 
 pygtail (0.5.0) lucid; urgency=low
 
   * Add handling of rotated and immediately compressed files (thanks @NotSqrt)
 
- -- Brad Greenlee <brad@footle.org>  Fri, 17 October 2014 09:39:00 -0700
+ -- Brad Greenlee <brad@footle.org>  Fri, 17 Oct 2014 09:39:00 -0700
 
 pygtail (0.4.0) lucid; urgency=low
 
