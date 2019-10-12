@@ -10,3 +10,4 @@ debian/pygtail/**
 debian/tmp/**
 debian/python-pygtail*
 debian/python3-pygtail*
+.pybuild/

@@ -10,11 +10,9 @@ import shutil
 import tempfile
 import gzip
 import io
-try:
-    from pygtail import Pygtail
-except Exception:
-    sys.path.insert(0,'..')
-    from pygtail import Pygtail
+
+from pygtail import Pygtail
+
 
 PY2 = sys.version_info[0] == 2
 
