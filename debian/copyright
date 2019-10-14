@@ -1,3 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pygtail
+Upstream-Contact: Brad Greenlee <brad@footle.org>
+Source: https://github.com/bgreenlee/pygtail
+
+Files: *
 Copyright: 2011 Brad Greenlee <brad@footle.org>
 License: GPL v2
  http://www.gnu.org/licenses/gpl-2.0.html
