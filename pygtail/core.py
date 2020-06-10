@@ -31,7 +31,7 @@ import glob
 import gzip
 from optparse import OptionParser
 
-__version__ = '0.11.1'
+__version__ = '0.11.2'
 
 
 PY3 = sys.version_info[0] == 3
@@ -92,6 +92,10 @@ class Pygtail(object):
                 # might have been rotated.
                 # Look for the rotated file and process that if we find it.
                 self._rotated_logfile = self._determine_rotated_logfile()
+                
+                # if file shrank and no rotated file was detected, assume the file has been rotated
+                if not self._rotated_logfile:
+                    self._offset = 0 # start from beginning instead of seeking past eof
 
     def __del__(self):
         if self._filehandle():
