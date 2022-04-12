@@ -62,9 +62,11 @@ class Pygtail(object):
     copytruncate  Support copytruncate-style log rotation (default: True)
     log_patterns  List of custom rotated log patterns to match (default: None)
     full_lines    Only log when line ends in a newline `\n` (default: False)
+    save_on_end   Automatically save the offset once the end of the file is reached (default: True)
     """
     def __init__(self, filename, offset_file=None, paranoid=False, copytruncate=True,
-                 every_n=0, on_update=False, read_from_end=False, log_patterns=None, full_lines=False):
+                 every_n=0, on_update=False, read_from_end=False, log_patterns=None, full_lines=False,
+                 save_on_end=True):
         self.filename = filename
         self.paranoid = paranoid
         self.every_n = every_n
@@ -73,6 +75,7 @@ class Pygtail(object):
         self.read_from_end = read_from_end
         self.log_patterns = log_patterns
         self._full_lines = full_lines
+        self._save_on_end = save_on_end
         self._offset_file = offset_file or "%s.offset" % self.filename
         self._offset_file_inode = 0
         self._offset = 0
@@ -118,16 +121,18 @@ class Pygtail(object):
                 try:
                     line = self._get_next_line()
                 except StopIteration:  # oops, empty file
-                    self._update_offset_file()
+                    if self._save_on_end:
+                        self.update_offset_file()
                     raise
             else:
-                self._update_offset_file()
+                if self._save_on_end:
+                    self.update_offset_file()
                 raise
 
         if self.paranoid:
-            self._update_offset_file()
+            self.update_offset_file()
         elif self.every_n and self.every_n <= self._since_update:
-            self._update_offset_file()
+            self.update_offset_file()
 
         return line
 
@@ -184,7 +189,7 @@ class Pygtail(object):
 
         return self._fh
 
-    def _update_offset_file(self):
+    def update_offset_file(self):
         """
         Update the offset file with the current inode and offset.
         """
