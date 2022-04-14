@@ -324,6 +324,25 @@ class PygtailTest(unittest.TestCase):
         self.assertEqual(pygtail.read(), "5,5.5\n6\n")
 
 
+    def test_save_on_end(self):
+        """
+        Test save offset is not automatically saved once the end of the file is reached
+        """
+        updates = [0]
+
+        def record_update():
+            updates[0] += 1
+
+        pygtail = Pygtail(self.logfile.name, save_on_end=False, on_update=record_update)
+
+        self.assertEqual(updates[0], 0)
+        for line in pygtail:
+            self.assertEqual(updates[0], 0)
+        self.assertEqual(updates[0], 0)
+        pygtail.update_offset_file()
+        self.assertEqual(updates[0], 1)
+
+
 def main():
     unittest.main(buffer=True)
 
