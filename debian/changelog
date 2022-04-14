@@ -1,3 +1,9 @@
+pygtail (0.12.0) lucid; urgency=low
+
+  * Add option to disable save on end. (thanks @pajowu!)
+
+ -- Brad Greenlee <brad@footle.org>  Thu, 14 Apr 2022 08:31:00 -0700
+
 pygtail (0.11.1) lucid; urgency=low
 
   * Update debian packaging
