@@ -97,6 +97,12 @@ class Pygtail(object):
                 # might have been rotated.
                 # Look for the rotated file and process that if we find it.
                 self.rotated_logfile = self._determine_rotated_logfile()
+                # If copytruncate is enabled and we can't find the rotated logfile, all we can do is reset.
+                if self.copytruncate and self.rotated_logfile is None:
+                    sys.stderr.write("[pygtail] [WARN] log file was rotated to unknown location. Resetting.\n")
+                    self.offset = 0
+                    self.update_offset_file()
+
 
     def __del__(self):
         if self._filehandle():

@@ -323,8 +323,14 @@ class PygtailTest(unittest.TestCase):
         self.append(new_lines[0])
         self.append(new_lines[1])
         # reopen using Pytgail
+        sys.stderr = captured = io.BytesIO() if PY2 else io.StringIO()
         pygtail = Pygtail(self.logfile.name)
+        captured_value = captured.getvalue()
+        sys.stderr = sys.__stderr__
+        assert_class = self.assertRegex if sys.version_info >= (3, 1) else self.assertRegexpMatches
+        assert_class(captured_value, r".*?\bWARN\b.*?\bResetting\b.*")
         self.assertEqual(pygtail.read(), ''.join(new_lines))
+
 
     def test_full_lines(self):
         """
