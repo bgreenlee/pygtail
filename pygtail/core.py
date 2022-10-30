@@ -75,28 +75,28 @@ class Pygtail(object):
         self.copytruncate = copytruncate
         self.read_from_end = read_from_end
         self.log_patterns = log_patterns
-        self._full_lines = full_lines
-        self._save_on_end = save_on_end
+        self.full_lines = full_lines
+        self.save_on_end = save_on_end
         self.encoding = encoding
-        self._offset_file = offset_file or "%s.offset" % self.filename
-        self._offset_file_inode = 0
-        self._offset = 0
-        self._since_update = 0
-        self._fh = None
-        self._rotated_logfile = None
+        self.offset_file = offset_file or "%s.offset" % self.filename
+        self.offset_file_inode = 0
+        self.offset = 0
+        self.since_update = 0
+        self.fh = None
+        self.rotated_logfile = None
 
         # if offset file exists and non-empty, open and parse it
-        if exists(self._offset_file) and getsize(self._offset_file):
-            offset_fh = open(self._offset_file, "r")
-            (self._offset_file_inode, self._offset) = \
+        if exists(self.offset_file) and getsize(self.offset_file):
+            offset_fh = open(self.offset_file, "r")
+            (self.offset_file_inode, self.offset) = \
                 [int(line.strip()) for line in offset_fh]
             offset_fh.close()
-            if self._offset_file_inode != stat(self.filename).st_ino or \
-                    stat(self.filename).st_size < self._offset:
+            if self.offset_file_inode != stat(self.filename).st_ino or \
+                    stat(self.filename).st_size < self.offset:
                 # The inode has changed or filesize has reduced so the file
                 # might have been rotated.
                 # Look for the rotated file and process that if we find it.
-                self._rotated_logfile = self._determine_rotated_logfile()
+                self.rotated_logfile = self._determine_rotated_logfile()
 
     def __del__(self):
         if self._filehandle():
@@ -116,24 +116,24 @@ class Pygtail(object):
             # rotated log file or the file has been renamed, we can continue with the actual file; otherwise
             # update the offset file
             if self._is_new_file():
-                self._rotated_logfile = None
-                self._fh.close()
-                self._offset = 0
+                self.rotated_logfile = None
+                self.fh.close()
+                self.offset = 0
                 # open up current logfile and continue
                 try:
                     line = self._get_next_line()
                 except StopIteration:  # oops, empty file
-                    if self._save_on_end:
+                    if self.save_on_end:
                         self.update_offset_file()
                     raise
             else:
-                if self._save_on_end:
+                if self.save_on_end:
                     self.update_offset_file()
                 raise
 
         if self.paranoid:
             self.update_offset_file()
-        elif self.every_n and self.every_n <= self._since_update:
+        elif self.every_n and self.every_n <= self.since_update:
             self.update_offset_file()
 
         return line
@@ -162,14 +162,14 @@ class Pygtail(object):
             return None
 
     def _is_closed(self):
-        if not self._fh:
+        if not self.fh:
             return True
         try:
-            return self._fh.closed
+            return self.fh.closed
         except AttributeError:
-            if isinstance(self._fh, gzip.GzipFile):
+            if isinstance(self.fh, gzip.GzipFile):
                 # python 2.6
-                return self._fh.fileobj is None
+                return self.fh.fileobj is None
             else:
                 raise
 
@@ -178,20 +178,20 @@ class Pygtail(object):
         Return a filehandle to the file being tailed, with the position set
         to the current offset.
         """
-        if not self._fh or self._is_closed():
-            filename = self._rotated_logfile or self.filename
+        if not self.fh or self._is_closed():
+            filename = self.rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self._fh = gzip.open(filename, 'r')
+                self.fh = gzip.open(filename, 'r')
             elif PY3:
-                self._fh = open(filename, "r", 1, encoding=self.encoding)
+                self.fh = open(filename, "r", 1, encoding=self.encoding)
             else:
-                self._fh = io.open(filename, "r", 1, encoding=self.encoding)
-            if self.read_from_end and not exists(self._offset_file):
-                self._fh.seek(0, os.SEEK_END)
+                self.fh = io.open(filename, "r", 1, encoding=self.encoding)
+            if self.read_from_end and not exists(self.offset_file):
+                self.fh.seek(0, os.SEEK_END)
             else:
-                self._fh.seek(self._offset)
+                self.fh.seek(self.offset)
 
-        return self._fh
+        return self.fh
 
     def update_offset_file(self):
         """
@@ -201,10 +201,10 @@ class Pygtail(object):
             self.on_update()
         offset = self._filehandle().tell()
         inode = fstat(self._filehandle().fileno()).st_ino
-        fh = open(self._offset_file, "w")
+        fh = open(self.offset_file, "w")
         fh.write("%s\n%s\n" % (inode, offset))
         fh.close()
-        self._since_update = 0
+        self.since_update = 0
 
     def _determine_rotated_logfile(self):
         """
@@ -213,19 +213,19 @@ class Pygtail(object):
         """
         rotated_filename = self._check_rotated_filename_candidates()
         if rotated_filename and exists(rotated_filename):
-            if stat(rotated_filename).st_ino == self._offset_file_inode:
+            if stat(rotated_filename).st_ino == self.offset_file_inode:
                 return rotated_filename
 
             # if the inode hasn't changed, then the file shrank; this is expected with copytruncate,
             # otherwise print a warning
-            if stat(self.filename).st_ino == self._offset_file_inode:
+            if stat(self.filename).st_ino == self.offset_file_inode:
                 if self.copytruncate:
                     return rotated_filename
                 else:
                     sys.stderr.write(
                         "[pygtail] [WARN] file size of %s shrank, and copytruncate support is "
                         "disabled (expected at least %d bytes, was %d bytes).\n" %
-                        (self.filename, self._offset, stat(self.filename).st_size))
+                        (self.filename, self.offset, stat(self.filename).st_size))
 
         return None
 
@@ -280,20 +280,20 @@ class Pygtail(object):
 
     def _is_new_file(self):
         # Processing rotated logfile or at the end of current file which has been renamed
-        return self._rotated_logfile or \
+        return self.rotated_logfile or \
                self._filehandle().tell() == fstat(self._filehandle().fileno()).st_size and \
                fstat(self._filehandle().fileno()).st_ino != stat(self.filename).st_ino
 
     def _get_next_line(self):
         curr_offset = self._filehandle().tell()
         line = self._filehandle().readline()
-        if self._full_lines:
+        if self.full_lines:
             if not line.endswith('\n'):
                 self._filehandle().seek(curr_offset)
                 raise StopIteration
         if not line:
             raise StopIteration
-        self._since_update += 1
+        self.since_update += 1
         return line
 
 
