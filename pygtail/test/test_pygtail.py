@@ -366,6 +366,45 @@ class PygtailTest(unittest.TestCase):
         self.assertEqual(updates[0], 1)
 
 
+    def test_iterator_with_offsets(self):
+        """
+        Test save offset is not automatically saved once the end of the file is reached
+        """
+        updates = [0]
+
+        def record_update():
+            updates[0] += 1
+
+        pygtail = Pygtail(self.logfile.name, save_on_end=False, on_update=record_update, copytruncate=False,)
+
+        self.assertEqual(updates[0], 0)
+        lines, offsets = list(zip(*pygtail.with_offsets()))
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(updates[0], 0)
+        pygtail.write_offset_to_file(offsets[1])
+        self.assertEqual(updates[0], 1)
+
+        for i in range(len(offsets)-1):
+            self.assertLess(offsets[i], offsets[i+1])
+
+        pygtail = Pygtail(self.logfile.name, save_on_end=False, on_update=record_update, copytruncate=False,)
+        lines_new, offsets_new = list(zip(*pygtail.with_offsets()))
+        self.assertEqual(len(lines_new), 1)
+        self.assertEqual(updates[0], 1)
+        self.assertEqual(offsets_new, offsets[2:])
+
+    def test_offset_comparisons(self):
+        """Test comparison operators of the Offset dataclass"""
+        pygtail = Pygtail(self.logfile.name)
+        _, offsets = list(zip(*pygtail.with_offsets()))
+        for i in range(len(offsets)-1, ):
+            self.assertLess(offsets[i], offsets[i+1])
+            self.assertLessEqual(offsets[i], offsets[i+1])
+            self.assertLessEqual(offsets[i], offsets[i])
+            self.assertGreater(offsets[i+1], offsets[i])
+            self.assertGreaterEqual(offsets[i], offsets[i])
+            self.assertGreaterEqual(offsets[i+1], offsets[i])
+
 def main():
     unittest.main(buffer=True)
 

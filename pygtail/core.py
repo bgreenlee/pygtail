@@ -49,6 +49,58 @@ def force_text(s, encoding='utf-8', errors='strict'):
     return s.decode(encoding, errors)
 
 
+class Offset:
+    """Data-class to store file-offsets"""
+
+    def __init__(self, counter, inode, offset):
+        self.counter = counter
+        self.inode = inode
+        self.offset = offset
+
+    def __eq__(self, other):
+        return self.counter == other.counter and self.offset == other.offset
+
+    def __lt__(self, other):
+        return self.counter < other.counter or (
+            self.counter == other.counter and self.offset < other.offset
+        )
+
+    def __le__(self, other):
+        return self.__lt__(other) or self.__eq__(other)
+
+    def __gt__(self, other):
+        return not self.__le__(other)
+
+    def __ge__(self, other):
+        return not self.__le__(other) or self.__eq__(other)
+
+    def __repr__(self):
+        return "Offset(counter=%d, inode=%d, offset=%d" % (
+            self.counter,
+            self.inode,
+            self.offset,
+        )
+
+
+class PygtailIteratorWithOffsets:
+    def __init__(self, pygtail):
+        self._pygtail = pygtail
+
+    def __next__(self):
+        return self.next()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        next_line = self._pygtail.next()
+        offset = self._pygtail._filehandle().tell()
+        inode = fstat(self._pygtail._filehandle().fileno()).st_ino
+        counter = self._pygtail._counter
+        offset_instance = Offset(counter, inode, offset)
+        return next_line, offset_instance
+
+
 class Pygtail(object):
     """
     Creates an iterable object that returns only unread lines.
@@ -84,6 +136,7 @@ class Pygtail(object):
         self.since_update = 0
         self.fh = None
         self.rotated_logfile = None
+        self._counter = 0
 
         # if offset file exists and non-empty, open and parse it
         if exists(self.offset_file) and getsize(self.offset_file):
@@ -144,6 +197,10 @@ class Pygtail(object):
 
         return line
 
+    def with_offsets(self):
+        """Returns an iterator that yields lines with their internal offset state"""
+        return PygtailIteratorWithOffsets(self)
+
     def __next__(self):
         """`__next__` is the Python 3 version of `next`"""
         return self.next()
@@ -185,6 +242,7 @@ class Pygtail(object):
         to the current offset.
         """
         if not self.fh or self._is_closed():
+            self._counter += 1
             filename = self.rotated_logfile or self.filename
             if filename.endswith('.gz'):
                 self.fh = gzip.open(filename, 'r')
@@ -211,6 +269,14 @@ class Pygtail(object):
         fh.write("%s\n%s\n" % (inode, offset))
         fh.close()
         self.since_update = 0
+
+    def write_offset_to_file(self, offset):
+        """Writes an `Offset` to the offset file"""
+        if self.on_update:
+            self.on_update()
+        fh = open(self.offset_file, "w")
+        fh.write("%s\n%s\n" % (offset.inode, offset.offset))
+        fh.close()
 
     def _determine_rotated_logfile(self):
         """
