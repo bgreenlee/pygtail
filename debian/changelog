@@ -1,3 +1,10 @@
+pygtail (0.14.0) lucid; urgency=low
+
+  * Added with_offsets iterator and write_offset_to_file method. (thanks @pajowu!)
+  * Included LICENSE file in distribution.
+
+ -- Brad Greenlee <brad@footle.org>  Sun, 6 Nov 2022 06:48:00 -0800
+
 pygtail (0.13.0) lucid; urgency=low
 
   * Add option to set the file encoding. (thanks @Robert-Lebedeu and @ondrej-bouda!)
