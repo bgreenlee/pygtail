@@ -50,6 +50,22 @@ In your code:
     for line in Pygtail("some.log"):
         sys.stdout.write(line)
 
+
+An example showing iterating over lines with offsets and manual control over offset updates:
+
+.. code:: python
+
+    import pygtail
+
+    tail = pygtail.Pygtail(logfile, save_on_end=False, copytruncate=False)
+
+    for line, offset in tail.with_offsets():
+        # Do someting
+
+    # figure out right offset to save
+    tail.write_offset_to_file(right_offset)
+
+
 Contributing
 ------------
 
