@@ -405,6 +405,26 @@ class PygtailTest(unittest.TestCase):
             self.assertGreaterEqual(offsets[i], offsets[i])
             self.assertGreaterEqual(offsets[i+1], offsets[i])
 
+    def test_compressed_full_lines(self):
+        new_lines = ["4\n5\n", "6\n7\n"]
+        pygtail = Pygtail(self.logfile.name, full_lines=True)
+        pygtail.read()
+        self.append(new_lines[0])
+
+        # put content to gzip file
+        gzip_handle = gzip.open("%s.1.gz" % self.logfile.name, 'wb')
+        with open(self.logfile.name, 'rb') as logfile:
+            gzip_handle.write(logfile.read())
+        gzip_handle.close()
+
+        with open(self.logfile.name, 'w'):
+            # truncate file
+            pass
+
+        self.append(new_lines[1])
+        pygtail = Pygtail(self.logfile.name, full_lines=True)
+        self.assertEqual(pygtail.read(), ''.join(new_lines))
+
 def main():
     unittest.main(buffer=True)
 

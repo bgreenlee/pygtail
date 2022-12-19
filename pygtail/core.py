@@ -245,7 +245,7 @@ class Pygtail(object):
             self._counter += 1
             filename = self.rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self.fh = gzip.open(filename, 'r')
+                self.fh = gzip.open(filename, 'rt')
             elif PY3:
                 self.fh = open(filename, "r", 1, encoding=self.encoding)
             else:
