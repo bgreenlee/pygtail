@@ -245,11 +245,11 @@ class Pygtail(object):
             self._counter += 1
             filename = self.rotated_logfile or self.filename
             if filename.endswith('.gz'):
-                self.fh = gzip.open(filename, 'r')
+                self.fh = gzip.open(filename, 'r', errors="backslashreplace")
             elif PY3:
-                self.fh = open(filename, "r", 1, encoding=self.encoding)
+                self.fh = open(filename, "r", 1, encoding=self.encoding, errors="backslashreplace")
             else:
-                self.fh = io.open(filename, "r", 1, encoding=self.encoding)
+                self.fh = io.open(filename, "r", 1, encoding=self.encoding, errors="backslashreplace")
             if self.read_from_end and not exists(self.offset_file):
                 self.fh.seek(0, os.SEEK_END)
             else:
