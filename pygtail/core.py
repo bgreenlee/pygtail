@@ -339,10 +339,22 @@ class Pygtail(object):
             rotated_filename_patterns.extend(self.log_patterns)
 
         # break into directory and filename components to support cases where the
-        # the file is prepended as part of rotation
+        # the file is prepended as part of rotation, as well as between rel_filename_without_extension and
+        # file_extension
         file_dir, rel_filename = os.path.split(self.filename)
+        rel_filename_without_extension, file_extension = os.path.splitext(rel_filename)
+
         for rotated_filename_pattern in rotated_filename_patterns:
-            candidates = glob.glob(os.path.join(file_dir, rotated_filename_pattern % rel_filename))
+            if "%s" in rotated_filename_pattern:
+                # backward compatible support
+                formatted = rotated_filename_pattern % rel_filename
+            else:
+                formatted = rotated_filename_pattern.format(
+                    rel_filename=rel_filename,
+                    rel_filename_without_extension=rel_filename_without_extension,
+                    file_extension=file_extension)
+            rejoined = os.path.join(file_dir, formatted)
+            candidates = glob.glob(rejoined)
             if candidates:
                 candidates.sort()
                 return candidates[-1]  # return most recent
