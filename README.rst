@@ -1,15 +1,19 @@
 pygtail
 =======
 
-A python "port" of [logcheck's logtail2](http://logcheck.org).
+A python "port" of logcheck's logtail2_.
 
-Pygtail reads log file lines that have not been read. It will even handle log
-files that have been rotated.
+.. _logtail2: https://logcheck.org
+
+Pygtail reads log file lines that have not been read. It will even
+handle log files that have been rotated.
 
 Usage
 -----
 
 From the command line:
+
+::
 
     Usage: pygtail.py [options] logfile
 
@@ -39,37 +43,43 @@ From the command line:
                             encoding)
       --version             Print version and exit.
 
+
 In your code:
 
-```python
-from pygtail import Pygtail
+.. code:: python
 
-for line in Pygtail("some.log"):
-    sys.stdout.write(line)
-```
+    from pygtail import Pygtail
 
-An example showing iterating over lines with offsets and manual control over offset updates:
+    for line in Pygtail("some.log"):
+        sys.stdout.write(line)
 
-```python
-import pygtail
 
-tail = pygtail.Pygtail(logfile, save_on_end=False, copytruncate=False)
+An example showing iterating over lines with offsets and manual control
+over offset updates:
 
-for line, offset in tail.with_offsets():
-    # Do someting
+.. code:: python
 
- # figure out right offset to save
- tail.write_offset_to_file(right_offset)
-```
+    import pygtail
+
+    tail = pygtail.Pygtail(logfile, save_on_end=False, copytruncate=False)
+
+    for line, offset in tail.with_offsets():
+        # Do someting
+
+    # figure out right offset to save
+    tail.write_offset_to_file(right_offset)
+
 
 Contributing
 ------------
 
-Pull requests are very much welcome, but I will not merge your changes if you don't include a test. Run tests with `python setup.py test`.
+Pull requests are very much welcome, but I will not merge your changes
+if you don't include a test. Run tests with `python setup.py test`.
 
 Build status
 ------------
 
-[![Build Status](https://secure.travis-ci.org/bgreenlee/pygtail.png)](http://travis-ci.org/bgreenlee/pygtail)
+|Build Status|
 
-
+.. |Build Status| image:: https://secure.travis-ci.org/bgreenlee/pygtail.png
+   :target: http://travis-ci.org/bgreenlee/pygtail

@@ -1,0 +1,157 @@
+[build-system]
+requires = [
+    "setuptools>= 61.0.0",
+    "setuptools_scm[toml]>=7.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygtail"
+description = "Reads log file lines that have not been read."
+dynamic = ["version"]
+readme = "README.rst"
+
+# legacy bits and new both fail in different versions
+# need workaround until PEP639 has more backend support
+# for now, use deprecated format for conda compatibility
+#license = "GPLv2-or-later"
+license-files = [
+    "LICENSE",
+]
+
+authors = [
+    {name = "Brad Greenlee"},
+    {email = "brad@footle.org"},
+]
+maintainers = [
+    {name = "Stephen L Arnold", email = "stephen.arnold42@gmail.com"},
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 2.6",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Logging"
+]
+
+# dependencies = []
+
+requires-python = ">=3.6"
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "isort",
+    "mypy==0.990",
+    "black >= 22.3.0",
+    "pylint >= 3.1.0",
+]
+cov = [
+    "covdefaults",
+    "coverage[toml]",
+]
+doc = [
+    "sphinx",
+    "sphinx_git",
+    "sphinx-autoapi",
+    "sphinx_rtd_theme",
+    "recommonmark",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+[project.scripts]
+pygtail = "pygtail.core:main"
+
+[project.urls]
+Homepage = "https://github.com/bgreenlee/pygtail"
+Repository = "https://github.com/bgreenlee/pygtail.git"
+Issues = "https://github.com/bgreenlee/pygtail/issues"
+Changelog = "https://github.com/bgreenlee/pygtail/blob/main/CHANGELOG.rst"
+
+[tool.setuptools.packages.find]
+namespaces = true
+include = [
+    "pygtail",
+    "pygtail.test",
+]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests",]
+log_cli =  true
+doctest_optionflags = ["ELLIPSIS", "NORMALIZE_WHITESPACE",]
+addopts = "--strict-markers"
+markers = "subscript"
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["pygtail"]
+omit = [
+    "setup.py",
+    ".tox",
+]
+
+[tool.coverage.paths]
+source = ["pygtail"]
+
+[tool.coverage.report]
+fail_under = 15
+show_missing = true
+ignore_errors = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "if typing.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.black]
+line-length = 90
+skip-string-normalization = true
+include = '\.py$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | docs
+  | dist
+  | tests
+)/
+'''
+
+[tool.pycln]
+all = true
+
+[tool.isort]
+line_length = 72
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+exclude =  [".tox"]
+
+[tool.bandit]
+exclude_dirs = ["debian", "tests"]
+#skips = ["B101"]
