@@ -263,11 +263,13 @@ class Pygtail(object):
         """
         if self.on_update:
             self.on_update()
+        tmp_filename = self.offset_file + ".tmp"
         offset = self._filehandle().tell()
         inode = fstat(self._filehandle().fileno()).st_ino
-        fh = open(self.offset_file, "w")
+        fh = open(tmp_filename, "w")
         fh.write("%s\n%s\n" % (inode, offset))
         fh.close()
+        os.rename(tmp_filename, self.offset_file)  # atomic file update, safer
         self.since_update = 0
 
     def write_offset_to_file(self, offset):
