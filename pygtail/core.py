@@ -83,8 +83,11 @@ class Offset:
 
 
 class PygtailIteratorWithOffsets:
-    def __init__(self, pygtail):
+    def __init__(self, pygtail, offset_position="post"):
         self._pygtail = pygtail
+        if offset_position not in ["pre", "post"]:
+            raise ValueError(f"offset_position needs to be either 'pre' or 'post', was '{offset_position}'")
+        self.offset_position = offset_position
 
     def __next__(self):
         return self.next()
@@ -92,14 +95,23 @@ class PygtailIteratorWithOffsets:
     def __iter__(self):
         return self
 
-    def next(self):
-        next_line = self._pygtail.next()
+    def _get_offset(self):
         offset = self._pygtail._filehandle().tell()
         inode = fstat(self._pygtail._filehandle().fileno()).st_ino
         counter = self._pygtail._counter
         offset_instance = Offset(counter, inode, offset)
-        return next_line, offset_instance
+        return offset_instance
 
+    def next(self):
+        if self.offset_position == "pre":
+            offset = self._get_offset()
+            line = self._pygtail.next()
+
+        if self.offset_position == "post":
+            line = self._pygtail.next()
+            offset = self._get_offset()
+
+        return line, offset
 
 class Pygtail(object):
     """
@@ -197,9 +209,9 @@ class Pygtail(object):
 
         return line
 
-    def with_offsets(self):
+    def with_offsets(self, offset_position="post"):
         """Returns an iterator that yields lines with their internal offset state"""
-        return PygtailIteratorWithOffsets(self)
+        return PygtailIteratorWithOffsets(self, offset_position)
 
     def __next__(self):
         """`__next__` is the Python 3 version of `next`"""
