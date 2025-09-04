@@ -397,6 +397,7 @@ def main():
         help="Encoding to use for reading files (default: system encoding)")
     cmdline.add_option("--version", action="store_true",
         help="Print version and exit.")
+    cmdline.add_option("--search", "-s", action="store", help="search for specific pattern")
 
     options, args = cmdline.parse_args()
 
@@ -418,9 +419,15 @@ def main():
                       log_patterns=options.log_pattern,
                       full_lines=options.full_lines,
                       encoding=options.encoding)
-
-    for line in pygtail:
-        sys.stdout.write(line)
+    
+    
+    for line in pygtail:    
+        if options.search:
+            pattern = options.search   
+            if pattern in line:
+                sys.stdout.write(line)
+        else:
+            sys.stdout.write(line)                
 
 
 if __name__ == "__main__":
